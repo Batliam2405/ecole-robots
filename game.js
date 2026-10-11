@@ -2017,13 +2017,14 @@ ouvrirPreparationEvaluation(evaluation.id);
 }
 
 
+
 function afficherEspaceEleves() {
     const zone = document.getElementById("section-contenu");
 
     zone.innerHTML = `
         <div class="evaluations">
             <h2>🧑‍🎓 Espace élèves</h2>
-            <p>Choisis une classe, puis le robot qui va passer son évaluation.</p>
+            <p>Choisis une classe pour afficher ses évaluations.</p>
 
             <label for="choix-classe-eleve">🏫 Classe</label>
             <select id="choix-classe-eleve">
@@ -2035,46 +2036,16 @@ function afficherEspaceEleves() {
                 `).join("")}
             </select>
 
-            <label for="choix-robot-eleve">🤖 Robot élève</label>
-            <select id="choix-robot-eleve" disabled>
-                <option value="">-- Choisis d'abord une classe --</option>
-            </select>
-
             <div id="liste-evaluations-eleve">
-    <p>🏫 Choisis une classe pour voir ses évaluations publiées.</p>
-</div>
-
-            <div id="liste-evaluations-eleve"></div>
+                <p>📚 Choisis une classe pour commencer.</p>
+            </div>
         </div>
     `;
 
     const choixClasse = document.getElementById("choix-classe-eleve");
-    const choixRobot = document.getElementById("choix-robot-eleve");
 
     choixClasse.addEventListener("change", function () {
-        const classeId = Number(this.value);
-
-        const robotsClasse = robots.filter(
-            robot => robot.classeId === classeId
-        );
-
-        choixRobot.innerHTML = `
-            <option value="">-- Choisir un robot --</option>
-            ${robotsClasse.map(robot => `
-                <option value="${robot.id}">
-                    ${echapperHTML(robot.nom)}
-                </option>
-            `).join("")}
-        `;
-
-        choixRobot.disabled = !this.value || robotsClasse.length === 0;
-
-        if (this.value && robotsClasse.length === 0) {
-            choixRobot.innerHTML =
-                '<option value="">Aucun robot dans cette classe</option>';
-        }
-
-        afficherEvaluationsClasse(classeId);
+        afficherEvaluationsClasse(Number(this.value));
     });
 }
 
