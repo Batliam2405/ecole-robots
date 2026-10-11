@@ -1663,94 +1663,102 @@ window.addEventListener("beforeunload", sauvegarderDonnees);
 
 
 function afficherMenuEvaluations() {
-    const zone = document.getElementById("section-contenu");
+const zone = document.getElementById("section-contenu");
 
-    zone.innerHTML = `
-        <div class="evaluations">
-            <h2>📝 Mes évaluations</h2>
-            <p>Prépare les contrôles de tes élèves robots.</p>
+```
+zone.innerHTML = `
+    <div class="evaluations">
+        <h2>📝 Mes évaluations</h2>
+        <p>Prépare les contrôles de tes élèves robots.</p>
 
-            <form id="form-evaluation">
-                <label for="evaluation-titre">Nom de l'évaluation</label>
-                <input
-                    type="text"
-                    id="evaluation-titre"
-                    name="titre"
-                    placeholder="Exemple : Contrôle sur les additions"
-                    required
-                >
+        <form id="form-evaluation">
+            <label for="evaluation-titre">Nom de l'évaluation</label>
+            <input
+                type="text"
+                id="evaluation-titre"
+                name="titre"
+                placeholder="Exemple : Contrôle sur les additions"
+                required
+            >
 
-                <label for="evaluation-classe">Classe</label>
-                <select id="evaluation-classe" name="classeId" required>
-                    ${classes.map(classe => `
-                        <option value="${classe.id}">
-                            ${echapperHTML(classe.nom)}
-                        </option>
-                    `).join("")}
-                </select>
+            <label for="evaluation-classe">Classe</label>
+            <select id="evaluation-classe" name="classeId" required>
+                ${classes.map(classe => `
+                    <option value="${classe.id}">
+                        ${echapperHTML(classe.nom)}
+                    </option>
+                `).join("")}
+            </select>
 
-                <label for="evaluation-matiere">Matière</label>
-                <select id="evaluation-matiere" name="matiere" required>
-                    ${matieresDisponibles.map(matiere => `
-                        <option value="${echapperHTML(matiere)}">
-                            ${echapperHTML(matiere)}
-                        </option>
-                    `).join("")}
-                </select>
+            <label for="evaluation-matiere">Matière</label>
+            <select id="evaluation-matiere" name="matiere" required>
+                ${matieresDisponibles.map(matiere => `
+                    <option value="${echapperHTML(matiere)}">
+                        ${echapperHTML(matiere)}
+                    </option>
+                `).join("")}
+            </select>
 
-                <button type="submit" class="primary-button">
-                    ➕ Créer l'évaluation
-                </button>
-            </form>
+            <button type="submit" class="primary-button">
+                ➕ Créer l'évaluation
+            </button>
+        </form>
 
-            <p id="message-evaluation" role="status"></p>
-            <div id="liste-evaluations"></div>
-        </div>
-    `;
+        <p id="message-evaluation" role="status"></p>
+        <div id="liste-evaluations"></div>
+    </div>
+`;
 
-    document.getElementById("form-evaluation")
-        .addEventListener("submit", creerEvaluation);
+document.getElementById("form-evaluation")
+    .addEventListener("submit", creerEvaluation);
 
-    afficherListeEvaluations();
+afficherListeEvaluations();
+```
+
 }
 
 function creerEvaluation(event) {
-    event.preventDefault();
+event.preventDefault();
 
-    const donnees = new FormData(event.currentTarget);
+```
+const donnees = new FormData(event.currentTarget);
 
-    const titre = String(donnees.get("titre") || "").trim();
-    const classeId = Number(donnees.get("classeId"));
-    const matiere = String(donnees.get("matiere") || "");
+const titre = String(donnees.get("titre") || "").trim();
+const classeId = Number(donnees.get("classeId"));
+const matiere = String(donnees.get("matiere") || "");
 
-    const classe = classes.find(c => c.id === classeId);
+const classe = classes.find(c => c.id === classeId);
 
-    if (!titre || !classe || !matieresDisponibles.includes(matiere)) {
-        document.getElementById("message-evaluation").textContent =
-            "Vérifie le titre, la classe et la matière.";
-        return;
-    }
-
-    evaluations.push({
-        id: prochainIdEvaluation++,
-        titre,
-        classeId,
-        classeNom: classe.nom,
-        matiere,
-        date: new Date().toLocaleDateString("fr-FR"),
-        questions: [],
-        notes: []
-    });
-
-    sauvegarderDonnees();
-
+if (!titre || !classe || !matieresDisponibles.includes(matiere)) {
     document.getElementById("message-evaluation").textContent =
-        `✅ L'évaluation « ${titre} » a été créée pour la classe ${classe.nom}.`;
-
-    event.currentTarget.reset();
-
-    afficherListeEvaluations();
+        "Vérifie le titre, la classe et la matière.";
+    return;
 }
+
+evaluations.push({
+    id: prochainIdEvaluation++,
+    titre,
+    classeId,
+    classeNom: classe.nom,
+    matiere,
+    date: new Date().toLocaleDateString("fr-FR"),
+    questions: [],
+    notes: [],
+    statut: "brouillon"
+});
+
+sauvegarderDonnees();
+
+document.getElementById("message-evaluation").textContent =
+    `✅ L'évaluation « ${titre} » a été créée. Tu peux maintenant préparer ses questions.`;
+
+event.currentTarget.reset();
+
+afficherListeEvaluations();
+```
+
+}
+
 
 function afficherListeEvaluations() {
     const liste = document.getElementById("liste-evaluations");
