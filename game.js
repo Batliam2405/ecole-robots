@@ -2253,3 +2253,63 @@ function ouvrirEvaluationEleve(evaluationId) {
 }
 
 
+function ouvrirEvaluationClasse(evaluationId) {
+    const evaluation = evaluations.find(
+        element => element.id === Number(evaluationId)
+    );
+
+    if (!evaluation || evaluation.statut !== "publiee") {
+        alert("Cette évaluation n'est pas disponible.");
+        return;
+    }
+
+    const robotsClasse = robots.filter(
+        robot => robot.classeId === evaluation.classeId
+    );
+
+    if (robotsClasse.length === 0) {
+        alert("Cette classe ne contient aucun robot.");
+        return;
+    }
+
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>📝 ${echapperHTML(evaluation.titre)}</h2>
+            <p>🏫 Classe : ${echapperHTML(evaluation.classeNom)}</p>
+            <p>🤖 ${robotsClasse.length} robot(s) dans cette classe</p>
+            <p>Chaque robot aura sa propre copie.</p>
+
+            <div id="copies-classe">
+                ${robotsClasse.map(robot => {
+                    const copieExistante = (evaluation.copies || []).some(
+                        copie => copie.robotId === robot.id
+                    );
+
+                    return `
+                        <article class="evaluation-card">
+                            <h3>🤖 ${echapperHTML(robot.nom)}</h3>
+                            ${
+                                copieExistante
+                                ? `<p>✅ Copie déjà rendue</p>`
+                                : `
+                                    <button type="button"
+                                        class="primary-button"
+                                        onclick="ouvrirCopieRobot(${Number(evaluation.id)}, ${Number(robot.id)})">
+                                        ✏️ Passer l'évaluation
+                                    </button>
+                                `
+                            }
+                        </article>
+                    `;
+                }).join("")}
+            </div>
+
+            <button type="button" class="primary-button"
+                onclick="afficherEspaceEleves()">
+                ↩️ Retour aux évaluations
+            </button>
+        </div>
+    `;
+}
