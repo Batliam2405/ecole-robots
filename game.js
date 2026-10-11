@@ -1761,26 +1761,41 @@ afficherListeEvaluations();
 
 
 function afficherListeEvaluations() {
-    const liste = document.getElementById("liste-evaluations");
+const liste = document.getElementById("liste-evaluations");
 
-    if (!liste) return;
 
-    if (evaluations.length === 0) {
-        liste.innerHTML = "<p>Aucune évaluation créée pour le moment.</p>";
-        return;
-    }
+if (!liste) return;
 
-    liste.innerHTML = `
-        <h3>📋 Évaluations préparées</h3>
-
-        ${evaluations.map(evaluation => `
-            <article class="evaluation-card">
-                <h4>${echapperHTML(evaluation.titre)}</h4>
-                <p>🏫 Classe : ${echapperHTML(evaluation.classeNom)}</p>
-                <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
-                <p>📅 Créée le : ${echapperHTML(evaluation.date)}</p>
-                <p>❓ Questions : ${evaluation.questions.length}</p>
-            </article>
-        `).join("")}
-    `;
+if (evaluations.length === 0) {
+    liste.innerHTML = "<p>Aucune évaluation créée pour le moment.</p>";
+    return;
 }
+
+liste.innerHTML = `
+    <h3>📋 Évaluations préparées</h3>
+
+    ${evaluations.map(evaluation => `
+        <article class="evaluation-card">
+            <h4>${echapperHTML(evaluation.titre)}</h4>
+
+            <p>🏫 Classe : ${echapperHTML(evaluation.classeNom)}</p>
+            <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+            <p>📅 Créée le : ${echapperHTML(evaluation.date)}</p>
+            <p>❓ Questions : ${(evaluation.questions || []).length}</p>
+            <p>🎯 Total : ${(evaluation.questions || []).reduce(
+                (total, question) => total + (Number(question.points) || 0), 0
+            )} points</p>
+
+            <button
+                type="button"
+                class="primary-button"
+                onclick="ouvrirPreparationEvaluation(${Number(evaluation.id)})"
+            >
+                ✏️ Préparer les questions
+            </button>
+        </article>
+    `).join("")}
+`;
+
+}
+
