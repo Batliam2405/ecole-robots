@@ -2435,3 +2435,45 @@ function ouvrirCopieRobot(evaluationId, robotId) {
             ).disabled = true;
         });
 }
+
+
+function afficherCopiesACorriger() {
+    const zone = document.getElementById("section-contenu");
+
+    const copies = [];
+
+    evaluations.forEach(evaluation => {
+        (evaluation.copies || []).forEach(copie => {
+            copies.push({
+                evaluation: evaluation,
+                copie: copie
+            });
+        });
+    });
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>🧑‍🏫 Correction des copies</h2>
+            <p>Voici les évaluations rendues par les robots.</p>
+
+            ${
+                copies.length === 0
+                ? `<p>📭 Aucune copie rendue pour le moment.</p>`
+                : copies.map(element => `
+                    <article class="evaluation-card">
+                        <h3>📝 ${echapperHTML(element.evaluation.titre)}</h3>
+                        <p>🤖 Élève : ${echapperHTML(element.copie.robotNom)}</p>
+                        <p>📚 Matière : ${echapperHTML(element.evaluation.matiere)}</p>
+                        <p>📅 Rendue le : ${echapperHTML(element.copie.date)}</p>
+                        <p>📌 Statut : ${echapperHTML(element.copie.statut)}</p>
+
+                        <button type="button" class="primary-button"
+                            onclick="corrigerCopie(${Number(element.evaluation.id)}, ${Number(element.copie.id)})">
+                            ✏️ Corriger cette copie
+                        </button>
+                    </article>
+                `).join("")
+            }
+        </div>
+    `;
+}
