@@ -2135,7 +2135,7 @@ function afficherEvaluationsClasse(classeId) {
                     (total, question) => total + Number(question.points || 0), 0
                 )} points</p>
                 <button type="button" class="primary-button"
-    onclick="ouvrirEvaluationEleve(${Number(evaluation.id)})">
+    onclick="ouvrirEvaluationClasse(${Number(evaluation.id)})"
     ✏️ Passer l'évaluation
 </button>
             </article>
