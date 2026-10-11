@@ -1865,6 +1865,14 @@ zone.innerHTML = `
         <div id="liste-questions"></div>
 
         <button
+    type="button"
+    class="primary-button"
+    onclick="publierEvaluation(${Number(evaluation.id)})"
+>
+    📢 Publier l'évaluation
+</button>
+
+        <button
             type="button"
             class="primary-button"
             onclick="retourListeEvaluations()"
@@ -1978,3 +1986,28 @@ ouvrirPreparationEvaluation(evaluation.id);
 function retourListeEvaluations() {
 afficherMenuEvaluations();
 }
+
+function publierEvaluation(evaluationId) {
+const evaluation = evaluations.find(
+element => element.id === Number(evaluationId)
+);
+
+if (!evaluation) {
+    alert("Évaluation introuvable.");
+    return;
+}
+
+if (!Array.isArray(evaluation.questions) || evaluation.questions.length === 0) {
+    alert("Ajoute au moins une question avant de publier.");
+    return;
+}
+
+evaluation.statut = "publiee";
+sauvegarderDonnees();
+
+alert(`✅ L'évaluation « ${evaluation.titre} » est publiée pour la classe ${evaluation.classeNom}.`);
+
+ouvrirPreparationEvaluation(evaluation.id);
+
+}
+
