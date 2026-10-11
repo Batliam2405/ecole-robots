@@ -111,6 +111,11 @@ function ouvrirSection(section) {
     } else if (section === "evaluations") {
         afficherMenuEvaluations();
 
+    
+    } else if (section === "eleves") {
+        afficherEspaceEleves();
+
+
     } else {
         const sections = {
             ecole: [
