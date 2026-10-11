@@ -2016,3 +2016,40 @@ ouvrirPreparationEvaluation(evaluation.id);
 
 }
 
+
+function afficherEspaceEleves() {
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>🧑‍🎓 Espace élèves</h2>
+            <p>Choisis le robot qui va passer son évaluation.</p>
+
+            <label for="choix-robot-eleve">Robot élève</label>
+            <select id="choix-robot-eleve">
+                <option value="">-- Choisir un robot --</option>
+                ${robots.map(robot => {
+                    const classe = classes.find(c => c.id === robot.classeId);
+                    return `
+                        <option value="${robot.id}">
+                            ${echapperHTML(robot.nom)} — ${echapperHTML(classe ? classe.nom : "Classe inconnue")}
+                        </option>
+                    `;
+                }).join("")}
+            </select>
+
+            <button type="button" class="primary-button"
+                onclick="afficherEvaluationsEleve()">
+                🔎 Voir mes évaluations
+            </button>
+
+            <div id="liste-evaluations-eleve"></div>
+        </div>
+    `;
+
+    if (robots.length === 0) {
+        zone.querySelector("#liste-evaluations-eleve").innerHTML =
+            "<p>Tu dois d'abord inscrire un robot dans « Mes robots élèves ».</p>";
+    }
+}
+
