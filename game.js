@@ -1795,3 +1795,186 @@ liste.innerHTML = `
 
 }
 
+function ouvrirPreparationEvaluation(evaluationId) {
+const evaluation = evaluations.find(
+element => element.id === Number(evaluationId)
+);
+
+if (!evaluation) {
+    alert("Évaluation introuvable.");
+    return;
+}
+
+if (!Array.isArray(evaluation.questions)) {
+    evaluation.questions = [];
+}
+
+const zone = document.getElementById("section-contenu");
+
+zone.innerHTML = `
+    <div class="evaluations">
+        <h2>✏️ Préparer les questions</h2>
+        <h3>${echapperHTML(evaluation.titre)}</h3>
+
+        <p>🏫 Classe : ${echapperHTML(evaluation.classeNom)}</p>
+        <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+
+        <form id="form-question">
+            <label for="question-texte">Énoncé de la question</label>
+            <textarea
+                id="question-texte"
+                name="texte"
+                placeholder="Écris la question ici..."
+                required
+            ></textarea>
+
+            <label for="question-type">Type de réponse</label>
+            <select id="question-type" name="type">
+                <option value="texte">Réponse écrite</option>
+                <option value="qcm">Choix multiple (QCM)</option>
+            </select>
+
+            <div id="zone-choix-qcm" hidden>
+                <label for="question-choix">Choix possibles (un par ligne)</label>
+                <textarea
+                    id="question-choix"
+                    name="choix"
+                    placeholder="Choix A&#10;Choix B&#10;Choix C"
+                ></textarea>
+            </div>
+
+            <label for="question-points">Nombre de points</label>
+            <input
+                id="question-points"
+                name="points"
+                type="number"
+                min="1"
+                max="100"
+                value="1"
+                required
+            >
+
+            <button type="submit" class="primary-button">
+                ➕ Ajouter la question
+            </button>
+        </form>
+
+        <p id="message-question" role="status"></p>
+
+        <h3>📋 Questions créées</h3>
+        <div id="liste-questions"></div>
+
+        <button
+            type="button"
+            class="primary-button"
+            onclick="retourListeEvaluations()"
+        >
+            ↩️ Retour aux évaluations
+        </button>
+    </div>
+`;
+
+const formulaire = document.getElementById("form-question");
+const typeQuestion = document.getElementById("question-type");
+const zoneChoix = document.getElementById("zone-choix-qcm");
+
+typeQuestion.addEventListener("change", () => {
+    zoneChoix.hidden = typeQuestion.value !== "qcm";
+});
+
+formulaire.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const donnees = new FormData(formulaire);
+    const texte = String(donnees.get("texte") || "").trim();
+    const type = String(donnees.get("type") || "texte");
+    const points = Number(donnees.get("points"));
+    const choixTexte = String(donnees.get("choix") || "").trim();
+    const choix = choixTexte
+        .split("\n")
+        .map(choix => choix.trim())
+        .filter(choix => choix.length > 0);
+
+    if (!texte || !Number.isInteger(points) || points < 1 || points > 100) {
+        document.getElementById("message-question").textContent =
+            "Vérifie l'énoncé et le nombre de points.";
+        return;
+    }
+
+    if (type === "qcm" && choix.length < 2) {
+        document.getElementById("message-question").textContent =
+            "Pour un QCM, indique au moins deux choix, un par ligne.";
+        return;
+    }
+
+    evaluation.questions.push({
+        id: Date.now(),
+        texte,
+        type,
+        choix: type === "qcm" ? choix : [],
+        points
+    });
+
+    sauvegarderDonnees();
+
+    ouvrirPreparationEvaluation(evaluation.id);
+
+    document.getElementById("message-question").textContent =
+        "✅ Question ajoutée.";
+});
+
+afficherQuestionsEvaluation(evaluation);
+
+}
+
+function afficherQuestionsEvaluation(evaluation) {
+const liste = document.getElementById("liste-questions");
+if (!liste) return;
+
+if (evaluation.questions.length === 0) {
+    liste.innerHTML = "<p>Aucune question pour le moment.</p>";
+    return;
+}
+
+liste.innerHTML = evaluation.questions.map((question, index) => `
+    <article class="evaluation-card">
+        <h4>Question ${index + 1}</h4>
+        <p>${echapperHTML(question.texte)}</p>
+        <p>Type : ${question.type === "qcm" ? "QCM" : "Réponse écrite"}</p>
+        ${question.type === "qcm" ? `
+            <ul>
+                ${question.choix.map(choix => `<li>${echapperHTML(choix)}</li>`).join("")}
+            </ul>
+        ` : ""}
+        <p>🎯 ${Number(question.points)} point(s)</p>
+
+        <button
+            type="button"
+            onclick="supprimerQuestionEvaluation(${Number(evaluation.id)}, ${Number(question.id)})"
+        >
+            🗑️ Supprimer
+        </button>
+    </article>
+`).join("");
+
+}
+
+function supprimerQuestionEvaluation(evaluationId, questionId) {
+const evaluation = evaluations.find(
+element => element.id === Number(evaluationId)
+);
+
+if (!evaluation) return;
+
+evaluation.questions = evaluation.questions.filter(
+    question => question.id !== Number(questionId)
+);
+
+sauvegarderDonnees();
+ouvrirPreparationEvaluation(evaluation.id);
+
+}
+
+function retourListeEvaluations() {
+afficherMenuEvaluations();
+}
