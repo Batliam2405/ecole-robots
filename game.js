@@ -1714,10 +1714,6 @@ function afficherMenuEvaluations() {
     afficherListeEvaluations();
 }
 
-
-let evaluations = [];
-let prochainIdEvaluation = 1;
-
 function creerEvaluation(event) {
     event.preventDefault();
 
