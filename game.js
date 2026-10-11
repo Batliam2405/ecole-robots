@@ -2080,3 +2080,55 @@ function afficherEspaceEleves() {
 }
 
 
+function afficherEvaluationsEleve() {
+    const choixClasse = document.getElementById("choix-classe-eleve");
+    const choixRobot = document.getElementById("choix-robot-eleve");
+    const liste = document.getElementById("liste-evaluations-eleve");
+
+    const classeId = Number(choixClasse.value);
+    const robotId = Number(choixRobot.value);
+
+    if (!choixClasse.value || !choixRobot.value) {
+        liste.innerHTML = "<p>⚠️ Choisis d'abord une classe et un robot.</p>";
+        return;
+    }
+
+    const robot = robots.find(element => element.id === robotId);
+
+    if (!robot || robot.classeId !== classeId) {
+        liste.innerHTML = "<p>⚠️ Vérifie le robot sélectionné.</p>";
+        return;
+    }
+
+    const evaluationsDisponibles = evaluations.filter(evaluation =>
+        evaluation.statut === "publiee" &&
+        evaluation.classeId === classeId
+    );
+
+    if (evaluationsDisponibles.length === 0) {
+        liste.innerHTML = `
+            <p>📚 Bonjour ${echapperHTML(robot.nom)} !</p>
+            <p>Aucune évaluation n'est publiée pour ta classe pour le moment.</p>
+        `;
+        return;
+    }
+
+    liste.innerHTML = `
+        <h3>📝 Tes évaluations</h3>
+        <p>Bonjour ${echapperHTML(robot.nom)} ! Voici les contrôles disponibles.</p>
+
+        ${evaluationsDisponibles.map(evaluation => `
+            <article class="evaluation-card">
+                <h4>${echapperHTML(evaluation.titre)}</h4>
+                <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+                <p>❓ Questions : ${evaluation.questions.length}</p>
+                <p>🎯 Total : ${evaluation.questions.reduce(
+                    (total, question) => total + Number(question.points || 0), 0
+                )} points</p>
+                <p>📌 Statut : À passer</p>
+            </article>
+        `).join("")}
+    `;
+}
+
+
