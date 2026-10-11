@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot School</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">🤖 Robot School</div>
+        <div class="school-status">École robotique</div>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <div class="welcome-text">
+                <p class="eyebrow">TON ÉCOLE, TES RÈGLES</p>
+                <h1>Bienvenue à<br>Robot School !</h1>
+                <p>
+                    Construis tes classes, dirige tes robots élèves,
+                    organise les cours et gère tous les devoirs.
+                </p>
+                <button class="primary-button" onclick="entrerEcole()">
+                    Entrer dans l'école →
+                </button>
+            </div>
+            <div class="robot-illustration">🤖</div>
+        </section>
+
+        <section class="dashboard">
+            <h2>Le bureau de l'école</h2>
+
+            <div class="menu-grid">
+                <button class="menu-card" onclick="ouvrirSection('ecole')">
+                    <span class="card-icon">🏫</span>
+                    <strong>Mon école</strong>
+                    <span>Visiter les salles</span>
+                </button>
+
+                <button class="menu-card" onclick="ouvrirSection('classes')">
+                    <span class="card-icon">🤖</span>
+                    <strong>Mes robots élèves</strong>
+                    <span>Créer des élèves et des classes</span>
+                </button>
+
+                <button class="menu-card" onclick="ouvrirSection('emploi')">
+                    <span class="card-icon">📅</span>
+                    <strong>Emploi du temps</strong>
+                    <span>Organiser les cours</span>
+                </button>
+
+
+                <button onclick="ouvrirSection('cours')">📖 Cours et appel</button>
+
+                <button class="menu-card" onclick="ouvrirSection('devoirs')">
+                    <span class="card-icon">📚</span>
+                    <strong>Devoirs</strong>
+                    <span>Donner du travail aux robots</span>
+                </button>
+
+                <button class="menu-card" onclick="ouvrirSection('gestion')">
+                    <span class="card-icon">📝</span>
+                    <strong>Gestion scolaire</strong>
+                    <span>Notes, absences et suivi</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="contenu" class="content-panel" hidden>
+            <button class="back-button" onclick="retourAccueil()">
+                ← Retour à l'accueil
+            </button>
+            <div id="section-contenu"></div>
+        </section>
+    </main>
+
+    <footer>
+        Robot School · Une école où les robots sont les élèves 🤖
+    </footer>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,440 @@
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f6fc;
+    color: #202b45;
+}
+
+.topbar {
+    height: 72px;
+    padding: 0 7%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-bottom: 1px solid #e3e9f4;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: 800;
+    color: #3158d8;
+}
+
+.school-status {
+    padding: 9px 15px;
+    background: #eaf0ff;
+    color: #3158d8;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+main {
+    width: 86%;
+    max-width: 1200px;
+    margin: 35px auto;
+}
+
+.welcome {
+    min-height: 310px;
+    padding: 40px 55px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(120deg, #243d91, #5479ee);
+    border-radius: 25px;
+    color: white;
+    overflow: hidden;
+}
+
+.welcome-text {
+    max-width: 560px;
+}
+
+.eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #c8d6ff;
+}
+
+h1 {
+    margin: 12px 0;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.1;
+}
+
+.welcome-text p:not(.eyebrow) {
+    max-width: 480px;
+    line-height: 1.7;
+    color: #e5ebff;
+}
+
+.robot-illustration {
+    font-size: clamp(90px, 15vw, 170px);
+    padding: 10px;
+    filter: drop-shadow(0 12px 15px #18265a66);
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.primary-button {
+    margin-top: 12px;
+    padding: 14px 22px;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    color: #3158d8;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.primary-button:hover {
+    background: #eaf0ff;
+    transform: translateY(-2px);
+}
+
+.dashboard {
+    margin-top: 38px;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 18px;
+}
+
+.menu-card {
+    min-height: 175px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 10px;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    background: white;
+    color: #202b45;
+    transition: 0.2s;
+}
+
+.menu-card:hover {
+    transform: translateY(-4px);
+    border-color: #819af4;
+    box-shadow: 0 10px 25px #243d9112;
+}
+
+.card-icon {
+    font-size: 32px;
+}
+
+.menu-card strong {
+    font-size: 16px;
+}
+
+.menu-card span:last-child {
+    color: #77829a;
+    font-size: 13px;
+}
+
+.content-panel {
+    margin-top: 28px;
+    padding: 28px;
+    background: white;
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+}
+
+.back-button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 9px;
+    background: #eaf0ff;
+    color: #3158d8;
+    font-weight: 700;
+}
+
+footer {
+    padding: 25px;
+    text-align: center;
+    color: #7a859b;
+    font-size: 13px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 650px) {
+    .topbar {
+        padding: 0 5%;
+    }
+
+    main {
+        width: 92%;
+        margin-top: 20px;
+    }
+
+    .welcome {
+        padding: 28px;
+    }
+
+    .robot-illustration {
+        display: none;
+    }
+}
+
+.robot-form {
+    display: grid;
+    gap: 10px;
+    max-width: 460px;
+    margin: 24px 0;
+}
+
+.robot-form label {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.robot-form input,
+.robot-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dce3f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #202b45;
+    font: inherit;
+}
+
+.robot-form input:focus,
+.robot-form select:focus {
+    outline: 2px solid #819af4;
+    outline-offset: 2px;
+}
+
+.robot-form .primary-button {
+    width: fit-content;
+    background: #3158d8;
+    color: white;
+}
+
+.robot-summary {
+    margin: 24px 0 14px;
+    font-size: 18px;
+    color: #3158d8;
+}
+
+.robot-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+}
+
+.robot-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8faff;
+    border: 1px solid #e1e8f6;
+    border-radius: 15px;
+}
+
+.robot-avatar {
+    font-size: 35px;
+}
+
+.robot-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.robot-info h3 {
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
+}
+
+.robot-info p {
+    margin: 5px 0;
+    color: #66738c;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.delete-button {
+    border: none;
+    background: #ffecec;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.delete-button:hover {
+    background: #ffd8d8;
+}
+
+
+.timetable-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.timetable-controls label {
+    display: grid;
+    gap: 7px;
+    font-weight: 700;
+}
+
+.timetable-controls select {
+    padding: 11px;
+    border: 1px solid #dce3f0;
+    border-radius: 9px;
+    background: white;
+    font: inherit;
+}
+
+.timetable-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.timetable {
+    width: 100%;
+    min-width: 650px;
+    border-collapse: collapse;
+    background: white;
+}
+
+.timetable th,
+.timetable td {
+    padding: 12px 8px;
+    border: 1px solid #e1e8f6;
+    text-align: center;
+}
+
+.timetable th {
+    background: #eaf0ff;
+    color: #3158d8;
+}
+
+.timetable td:first-child {
+    font-weight: 700;
+    background: #f8faff;
+    white-space: nowrap;
+}
+
+.timetable-cell {
+    width: 100%;
+    min-height: 45px;
+    padding: 8px 4px;
+    border: 0;
+    border-radius: 8px;
+    background: #f0f4ff;
+    color: #243d91;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.timetable-cell:hover {
+    background: #dce6ff;
+}
+
+.timetable-cell.empty {
+    background: #f6f7fa;
+    color: #8490a5;
+}
+
+.timetable-help {
+    color: #66738c;
+    font-size: 13px;
+}
+
+
+/* Couleurs des matières dans l'emploi du temps */
+
+.timetable-cell {
+    min-height: 48px;
+    padding: 9px 6px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-weight: 700;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.timetable-cell:not(.empty):hover {
+    transform: scale(1.04);
+    box-shadow: 0 3px 10px #202b4520;
+}
+
+.timetable-cell.empty {
+    background: #f1f4f9;
+    color: #8792a6;
+    border: 1px dashed #cbd4e4;
+}
+
+/* Mathématiques */
+.timetable-cell[data-matiere="Mathématiques"] {
+    background: #DCE8FF;
+    color: #244DA8;
+}
+
+/* Français */
+.timetable-cell[data-matiere="Français"] {
+    background: #FFE0E3;
+    color: #A72E46;
+}
+
+/* Sciences */
+.timetable-cell[data-matiere="Sciences"] {
+    background: #D9F7E5;
+    color: #187647;
+}
+
+/* Histoire */
+.timetable-cell[data-matiere="Histoire"] {
+    background: #FFE9CC;
+    color: #96540A;
+}
+
+/* Géographie */
+.timetable-cell[data-matiere="Géographie"] {
+    background: #D4F5F4;
+    color: #126E70;
+}
+
+/* Anglais */
+.timetable-cell[data-matiere="Anglais"] {
+    background: #EDE0FF;
+    color: #7038AD;
+}
+
+/* Arts plastiques */
+.timetable-cell[data-matiere="Arts plastiques"] {
+    background: #FFF4B8;
+    color: #806000;
+}
+
+/* Éducation physique */
+.timetable-cell[data-matiere="Éducation physique"] {
+    background: #FFDCC7;
+    color: #A7471A;
+}
