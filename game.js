@@ -807,28 +807,187 @@ function afficherMenuCours() {
 );
 }
 
+
 function afficherFonctionCours(type) {
     const zone = document.getElementById("section-contenu");
 
-    const titres = {
-        exercices: "✏️ Préparation des exercices",
-        corrections: "✅ Corrections des travaux"
-    };
+    if (type === "corrections") {
+        zone.innerHTML = `
+            <h2>✅ Corrections des travaux</h2>
+            <p>Les réponses des robots seront affichées ici.</p>
+            <button type="button" id="retour-menu-cours">
+                ↩️ Retour à l'espace professeur
+            </button>
+        `;
+
+        document.getElementById("retour-menu-cours").addEventListener(
+            "click",
+            afficherMenuCours
+        );
+        return;
+    }
 
     zone.innerHTML = `
-        <h2>${titres[type]}</h2>
-        <p>Cette fonctionnalité sera développée dans les prochaines étapes.</p>
+        <h2>✏️ Préparation des exercices</h2>
+
+        <label for="exercice-classe">Classe :</label>
+        <select id="exercice-classe">
+            ${classes.map(classe => `
+                <option value="${classe.id}">
+                    ${echapperHTML(classe.nom)}
+                </option>
+            `).join("")}
+        </select>
+
+        <br><br>
+
+        <label for="exercice-matiere">Matière :</label>
+        <select id="exercice-matiere">
+            ${matieresDisponibles.map(matiere => `
+                <option value="${echapperHTML(matiere)}">
+                    ${echapperHTML(matiere)}
+                </option>
+            `).join("")}
+        </select>
+
+        <br><br>
+
+        <label for="exercice-titre">Titre de l'exercice :</label>
+        <input
+            type="text"
+            id="exercice-titre"
+            placeholder="Exemple : Les multiplications"
+        >
+
+        <br><br>
+
+        <label for="exercice-consigne">Consigne :</label>
+        <textarea
+            id="exercice-consigne"
+            rows="3"
+            placeholder="Explique ce que les robots doivent faire..."
+        ></textarea>
+
+        <br><br>
+
+        <button type="button" id="ajouter-question-exercice">
+            ➕ Ajouter une question
+        </button>
+
+        <div id="questions-exercice"></div>
+
+        <br>
+
+        <button type="button" id="enregistrer-exercice">
+            💾 Enregistrer l'exercice
+        </button>
+
         <button type="button" id="retour-menu-cours">
             ↩️ Retour à l'espace professeur
         </button>
     `;
+
+    const zoneQuestions = document.getElementById("questions-exercice");
+    let nombreQuestions = 0;
+
+    document.getElementById("ajouter-question-exercice")
+        .addEventListener("click", () => {
+            nombreQuestions++;
+
+            const bloc = document.createElement("div");
+            bloc.className = "question-exercice";
+            bloc.dataset.numero = nombreQuestions;
+
+            bloc.innerHTML = `
+                <hr>
+                <h3>Question ${nombreQuestions}</h3>
+
+                <label>Énoncé :</label>
+                <input
+                    type="text"
+                    class="question-enonce"
+                    placeholder="Écris la question"
+                >
+
+                <br><br>
+
+                <label>Réponse attendue :</label>
+                <input
+                    type="text"
+                    class="question-reponse"
+                    placeholder="Écris la bonne réponse"
+                >
+
+                <br><br>
+
+                <button type="button" class="supprimer-question">
+                    🗑️ Supprimer cette question
+                </button>
+            `;
+
+            bloc.querySelector(".supprimer-question")
+                .addEventListener("click", () => bloc.remove());
+
+            zoneQuestions.appendChild(bloc);
+        });
+
+    document.getElementById("enregistrer-exercice")
+        .addEventListener("click", () => {
+            const classeId = Number(
+                document.getElementById("exercice-classe").value
+            );
+            const matiere = document.getElementById("exercice-matiere").value;
+            const titre = document.getElementById("exercice-titre").value.trim();
+            const consigne = document.getElementById("exercice-consigne").value.trim();
+
+            const blocs = [...zoneQuestions.querySelectorAll(".question-exercice")];
+
+            const questions = blocs.map(bloc => ({
+                enonce: bloc.querySelector(".question-enonce").value.trim(),
+                reponse: bloc.querySelector(".question-reponse").value.trim()
+            }));
+
+            if (!titre) {
+                alert("Écris un titre pour l'exercice.");
+                return;
+            }
+
+            if (questions.length === 0) {
+                alert("Ajoute au moins une question.");
+                return;
+            }
+
+            if (questions.some(q => !q.enonce || !q.reponse)) {
+                alert("Complète toutes les questions et leurs réponses attendues.");
+                return;
+            }
+
+            const classe = classes.find(c => c.id === classeId);
+
+            exercices.push({
+                id: prochainIdExercice++,
+                titre,
+                consigne,
+                classeId,
+                classeNom: classe ? classe.nom : "Classe inconnue",
+                matiere,
+                questions,
+                reponsesRobots: [],
+                date: new Date().toLocaleDateString("fr-FR")
+            });
+
+            sauvegarderDonnees();
+
+            alert("Exercice enregistré !");
+
+            afficherFonctionCours("exercices");
+        });
 
     document.getElementById("retour-menu-cours").addEventListener(
         "click",
         afficherMenuCours
     );
 }
-
 
 
 function afficherPreparationLecon() {
