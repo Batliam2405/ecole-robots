@@ -2023,19 +2023,21 @@ function afficherEspaceEleves() {
     zone.innerHTML = `
         <div class="evaluations">
             <h2>🧑‍🎓 Espace élèves</h2>
-            <p>Choisis le robot qui va passer son évaluation.</p>
+            <p>Choisis une classe, puis le robot qui va passer son évaluation.</p>
 
-            <label for="choix-robot-eleve">Robot élève</label>
-            <select id="choix-robot-eleve">
-                <option value="">-- Choisir un robot --</option>
-                ${robots.map(robot => {
-                    const classe = classes.find(c => c.id === robot.classeId);
-                    return `
-                        <option value="${robot.id}">
-                            ${echapperHTML(robot.nom)} — ${echapperHTML(classe ? classe.nom : "Classe inconnue")}
-                        </option>
-                    `;
-                }).join("")}
+            <label for="choix-classe-eleve">🏫 Classe</label>
+            <select id="choix-classe-eleve">
+                <option value="">-- Choisir une classe --</option>
+                ${classes.map(classe => `
+                    <option value="${classe.id}">
+                        ${echapperHTML(classe.nom)}
+                    </option>
+                `).join("")}
+            </select>
+
+            <label for="choix-robot-eleve">🤖 Robot élève</label>
+            <select id="choix-robot-eleve" disabled>
+                <option value="">-- Choisis d'abord une classe --</option>
             </select>
 
             <button type="button" class="primary-button"
@@ -2047,9 +2049,34 @@ function afficherEspaceEleves() {
         </div>
     `;
 
-    if (robots.length === 0) {
-        zone.querySelector("#liste-evaluations-eleve").innerHTML =
-            "<p>Tu dois d'abord inscrire un robot dans « Mes robots élèves ».</p>";
-    }
+    const choixClasse = document.getElementById("choix-classe-eleve");
+    const choixRobot = document.getElementById("choix-robot-eleve");
+
+    choixClasse.addEventListener("change", function () {
+        const classeId = Number(this.value);
+
+        const robotsClasse = robots.filter(
+            robot => robot.classeId === classeId
+        );
+
+        choixRobot.innerHTML = `
+            <option value="">-- Choisir un robot --</option>
+            ${robotsClasse.map(robot => `
+                <option value="${robot.id}">
+                    ${echapperHTML(robot.nom)}
+                </option>
+            `).join("")}
+        `;
+
+        choixRobot.disabled = !this.value || robotsClasse.length === 0;
+
+        if (this.value && robotsClasse.length === 0) {
+            choixRobot.innerHTML =
+                '<option value="">Aucun robot dans cette classe</option>';
+        }
+
+        document.getElementById("liste-evaluations-eleve").innerHTML = "";
+    });
 }
+
 
