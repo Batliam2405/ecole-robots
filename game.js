@@ -2477,3 +2477,123 @@ function afficherCopiesACorriger() {
         </div>
     `;
 }
+
+
+function corrigerCopie(evaluationId, copieId) {
+    const evaluation = evaluations.find(
+        element => element.id === Number(evaluationId)
+    );
+
+    if (!evaluation) {
+        alert("Évaluation introuvable.");
+        return;
+    }
+
+    const copie = (evaluation.copies || []).find(
+        element => element.id === Number(copieId)
+    );
+
+    if (!copie) {
+        alert("Copie introuvable.");
+        return;
+    }
+
+    const zone = document.getElementById("section-contenu");
+    const totalPoints = (evaluation.questions || []).reduce(
+        (total, question) => total + Number(question.points || 0), 0
+    );
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>📝 Correction : ${echapperHTML(evaluation.titre)}</h2>
+            <p>🤖 Élève : ${echapperHTML(copie.robotNom)}</p>
+            <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+
+            ${(copie.reponses || []).map((reponse, index) => `
+                <article class="evaluation-card">
+                    <h3>Question ${index + 1}</h3>
+                    <p><strong>Énoncé :</strong>
+                        ${echapperHTML(reponse.texteQuestion || "")}</p>
+                    <p><strong>Réponse du robot :</strong></p>
+                    <p>${echapperHTML(reponse.reponse || "")}</p>
+                    <label for="points-${index}">
+                        Points obtenus (maximum ${Number(reponse.points || 0)})
+                    </label>
+                    <input
+                        id="points-${index}"
+                        type="number"
+                        min="0"
+                        max="${Number(reponse.points || 0)}"
+                        step="0.5"
+                        value="${Number(reponse.pointsObtenus || 0)}"
+                        required>
+                </article>
+            `).join("")}
+
+            <p><strong>Total possible : ${totalPoints} points</strong></p>
+
+            <label for="commentaire-copie">💬 Commentaire du professeur</label>
+            <textarea id="commentaire-copie" rows="3"
+                placeholder="Bravo, à revoir, conseils...">${echapperHTML(copie.commentaire || "")}</textarea>
+
+            <button type="button" class="primary-button"
+                id="enregistrer-correction">
+                💾 Enregistrer la note
+            </button>
+
+            <button type="button" class="primary-button"
+                onclick="afficherCopiesACorriger()">
+                ↩️ Retour aux copies
+            </button>
+
+            <p id="message-correction" role="status"></p>
+        </div>
+    `;
+
+    document.getElementById("enregistrer-correction")
+        .addEventListener("click", function () {
+            const notes = (copie.reponses || []).map((reponse, index) => {
+                const champ = document.getElementById(`points-${index}`);
+                return {
+                    points: Number(reponse.points || 0),
+                    obtenus: Number(champ.value)
+                };
+            });
+
+            const notesValides = notes.every((note, index) => {
+                const champ = document.getElementById(`points-${index}`);
+                return champ.value.trim() !== "" &&
+                    Number.isFinite(note.obtenus) &&
+                    note.obtenus >= 0 &&
+                    note.obtenus <= note.points;
+            });
+
+            if (!notesValides) {
+                document.getElementById("message-correction").textContent =
+                    "⚠️ Vérifie les points de chaque question.";
+                return;
+            }
+
+            copie.reponses.forEach((reponse, index) => {
+                reponse.pointsObtenus = notes[index].obtenus;
+            });
+
+            const pointsObtenus = notes.reduce(
+                (total, note) => total + note.obtenus, 0
+            );
+
+            copie.note = totalPoints > 0
+                ? Math.round((pointsObtenus / totalPoints) * 20 * 100) / 100
+                : 0;
+
+            copie.commentaire =
+                document.getElementById("commentaire-copie").value.trim();
+
+            copie.statut = "corrigée";
+
+            sauvegarderDonnees();
+
+            document.getElementById("message-correction").textContent =
+                `✅ Note enregistrée : ${copie.note}/20`;
+        });
+}
