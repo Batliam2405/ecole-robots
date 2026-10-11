@@ -2172,4 +2172,113 @@ function afficherEvaluationsClasse(classeId) {
     `;
 }
 
+function ouvrirEvaluationEleve(evaluationId) {
+    const evaluation = evaluations.find(
+        element => element.id === Number(evaluationId)
+    );
+
+    if (!evaluation || evaluation.statut !== "publiee") {
+        alert("Cette évaluation n'est pas disponible.");
+        return;
+    }
+
+    const choixRobot = document.getElementById("choix-robot-eleve");
+    const robotId = choixRobot ? Number(choixRobot.value) : 0;
+    const robot = robots.find(element => element.id === robotId);
+
+    if (!robot || robot.classeId !== evaluation.classeId) {
+        alert("Choisis d'abord un robot de la classe concernée.");
+        return;
+    }
+
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>📝 ${echapperHTML(evaluation.titre)}</h2>
+            <p>🤖 Élève : ${echapperHTML(robot.nom)}</p>
+            <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+            <p>Réponds à toutes les questions avant de rendre ta copie.</p>
+
+            <form id="form-reponses-eleve">
+                ${evaluation.questions.map((question, index) => `
+                    <article class="evaluation-card">
+                        <h3>Question ${index + 1}</h3>
+                        <p>${echapperHTML(question.texte)}</p>
+                        <p>🎯 ${Number(question.points)} point(s)</p>
+
+                        ${question.type === "qcm" ? `
+                            <label for="reponse-${index}">Ta réponse</label>
+                            <select id="reponse-${index}" name="reponse-${index}" required>
+                                <option value="">-- Choisir une réponse --</option>
+                                ${(question.choix || []).map(choix => `
+                                    <option value="${echapperHTML(choix)}">
+                                        ${echapperHTML(choix)}
+                                    </option>
+                                `).join("")}
+                            </select>
+                        ` : `
+                            <label for="reponse-${index}">Ta réponse écrite</label>
+                            <textarea id="reponse-${index}"
+                                name="reponse-${index}"
+                                rows="4" required
+                                placeholder="Écris ta réponse ici..."></textarea>
+                        `}
+                    </article>
+                `).join("")}
+
+                <button type="submit" class="primary-button">
+                    📬 Rendre ma copie
+                </button>
+            </form>
+
+            <p id="message-copie" role="status"></p>
+
+            <button type="button" class="primary-button"
+                onclick="afficherEspaceEleves()">
+                ↩️ Retour à l'espace élèves
+            </button>
+        </div>
+    `;
+
+    document.getElementById("form-reponses-eleve").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const donnees = new FormData(event.currentTarget);
+
+        const reponses = evaluation.questions.map((question, index) => ({
+            questionId: question.id,
+            texteQuestion: question.texte,
+            points: Number(question.points),
+            reponse: String(donnees.get(`reponse-${index}`) || "").trim()
+        }));
+
+        if (reponses.some(reponse => !reponse.reponse)) {
+            document.getElementById("message-copie").textContent =
+                "⚠️ Réponds à toutes les questions avant de rendre ta copie.";
+            return;
+        }
+
+        if (!Array.isArray(evaluation.copies)) {
+            evaluation.copies = [];
+        }
+
+        evaluation.copies.push({
+            id: Date.now(),
+            robotId: robot.id,
+            robotNom: robot.nom,
+            reponses,
+            date: new Date().toLocaleString("fr-FR"),
+            statut: "à corriger",
+            note: null
+        });
+
+        sauvegarderDonnees();
+
+        document.getElementById("message-copie").textContent =
+            "✅ Ta copie a été rendue au professeur !";
+        event.currentTarget.querySelector("button[type='submit']").disabled = true;
+    });
+}
+
 
