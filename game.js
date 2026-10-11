@@ -1575,6 +1575,8 @@ function sauvegarderDonnees() {
     classes,
     robots,
     devoirs,
+    exercices,
+    prochainIdExercice,
     evaluations,
     prochainIdEvaluation,
     historiqueResultats,
