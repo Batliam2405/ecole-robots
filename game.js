@@ -2163,6 +2163,10 @@ function afficherEvaluationsClasse(classeId) {
                 <p>🎯 Total : ${(evaluation.questions || []).reduce(
                     (total, question) => total + Number(question.points || 0), 0
                 )} points</p>
+                <button type="button" class="primary-button"
+    onclick="ouvrirEvaluationEleve(${Number(evaluation.id)})">
+    ✏️ Passer l'évaluation
+</button>
             </article>
         `).join("")}
     `;
