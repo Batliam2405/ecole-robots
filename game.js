@@ -1645,3 +1645,55 @@ chargerDonnees();
 // Sauvegarder automatiquement les données quand la page se ferme.
 window.addEventListener("beforeunload", sauvegarderDonnees);
 
+
+function afficherMenuEvaluations() {
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>📝 Mes évaluations</h2>
+            <p>Prépare les contrôles de tes élèves robots.</p>
+
+            <form id="form-evaluation">
+                <label for="evaluation-titre">Nom de l'évaluation</label>
+                <input
+                    type="text"
+                    id="evaluation-titre"
+                    name="titre"
+                    placeholder="Exemple : Contrôle sur les additions"
+                    required
+                >
+
+                <label for="evaluation-classe">Classe</label>
+                <select id="evaluation-classe" name="classeId" required>
+                    ${classes.map(classe => `
+                        <option value="${classe.id}">
+                            ${echapperHTML(classe.nom)}
+                        </option>
+                    `).join("")}
+                </select>
+
+                <label for="evaluation-matiere">Matière</label>
+                <select id="evaluation-matiere" name="matiere" required>
+                    ${matieresDisponibles.map(matiere => `
+                        <option value="${echapperHTML(matiere)}">
+                            ${echapperHTML(matiere)}
+                        </option>
+                    `).join("")}
+                </select>
+
+                <button type="submit" class="primary-button">
+                    ➕ Créer l'évaluation
+                </button>
+            </form>
+
+            <p id="message-evaluation" role="status"></p>
+            <div id="liste-evaluations"></div>
+        </div>
+    `;
+
+    document.getElementById("form-evaluation")
+        .addEventListener("submit", creerEvaluation);
+
+    afficherListeEvaluations();
+}
