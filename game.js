@@ -2040,10 +2040,9 @@ function afficherEspaceEleves() {
                 <option value="">-- Choisis d'abord une classe --</option>
             </select>
 
-            <button type="button" class="primary-button"
-                onclick="afficherEvaluationsEleve()">
-                🔎 Voir mes évaluations
-            </button>
+            <div id="liste-evaluations-eleve">
+    <p>🏫 Choisis une classe pour voir ses évaluations publiées.</p>
+</div>
 
             <div id="liste-evaluations-eleve"></div>
         </div>
@@ -2075,7 +2074,7 @@ function afficherEspaceEleves() {
                 '<option value="">Aucun robot dans cette classe</option>';
         }
 
-        document.getElementById("liste-evaluations-eleve").innerHTML = "";
+        afficherEvaluationsClasse(classeId);
     });
 }
 
@@ -2126,6 +2125,44 @@ function afficherEvaluationsEleve() {
                     (total, question) => total + Number(question.points || 0), 0
                 )} points</p>
                 <p>📌 Statut : À passer</p>
+            </article>
+        `).join("")}
+    `;
+}
+
+
+function afficherEvaluationsClasse(classeId) {
+    const liste = document.getElementById("liste-evaluations-eleve");
+    if (!liste) return;
+
+    const evaluationsDisponibles = evaluations.filter(evaluation =>
+        evaluation.statut === "publiee" &&
+        evaluation.classeId === Number(classeId)
+    );
+
+    if (!classeId) {
+        liste.innerHTML = "<p>🏫 Choisis une classe pour voir ses évaluations.</p>";
+        return;
+    }
+
+    if (evaluationsDisponibles.length === 0) {
+        liste.innerHTML = `
+            <p>📚 Aucune évaluation publiée pour cette classe.</p>
+        `;
+        return;
+    }
+
+    liste.innerHTML = `
+        <h3>📝 Évaluations de la classe</h3>
+
+        ${evaluationsDisponibles.map(evaluation => `
+            <article class="evaluation-card">
+                <h4>${echapperHTML(evaluation.titre)}</h4>
+                <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+                <p>❓ Questions : ${(evaluation.questions || []).length}</p>
+                <p>🎯 Total : ${(evaluation.questions || []).reduce(
+                    (total, question) => total + Number(question.points || 0), 0
+                )} points</p>
             </article>
         `).join("")}
     `;
