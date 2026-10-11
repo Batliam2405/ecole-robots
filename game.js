@@ -1620,6 +1620,15 @@ function chargerDonnees() {
             devoirs = sauvegarde.devoirs;
         }
 
+        if (Array.isArray(sauvegarde.exercices)) {
+exercices = sauvegarde.exercices;
+}
+
+if (Number.isInteger(sauvegarde.prochainIdExercice)) {
+prochainIdExercice = sauvegarde.prochainIdExercice;
+}
+
+
         if (Array.isArray(sauvegarde.evaluations)) {
     evaluations = sauvegarde.evaluations;
 }
