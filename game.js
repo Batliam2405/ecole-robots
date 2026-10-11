@@ -76,6 +76,8 @@ let robots = [
 let prochainIdRobot = 4;
 let historiqueResultats = [];
 let devoirs = [];
+let evaluations = [];
+let prochainIdEvaluation = 1;
 let prochainIdDevoir = 1;
 let historiqueDevoirs = [];
 let prochainIdClasse = 3;
@@ -83,6 +85,7 @@ let prochainIdClasse = 3;
 function entrerEcole() {
     ouvrirSection("ecole");
 }
+
 
 
 
@@ -104,6 +107,9 @@ function ouvrirSection(section) {
 
     } else if (section === "devoirs") {
         afficherCahierDevoirs();
+
+    } else if (section === "evaluations") {
+        afficherMenuEvaluations();
 
     } else {
         const sections = {
@@ -1562,6 +1568,8 @@ function sauvegarderDonnees() {
     classes,
     robots,
     devoirs,
+    evaluations,
+    prochainIdEvaluation,
     historiqueResultats,
     emploisDuTemps,
     historiqueAppels,
@@ -1602,6 +1610,14 @@ function chargerDonnees() {
         if (Array.isArray(sauvegarde.devoirs)) {
             devoirs = sauvegarde.devoirs;
         }
+
+        if (Array.isArray(sauvegarde.evaluations)) {
+    evaluations = sauvegarde.evaluations;
+}
+
+if (Number.isInteger(sauvegarde.prochainIdEvaluation)) {
+    prochainIdEvaluation = sauvegarde.prochainIdEvaluation;
+}
 
         if (Array.isArray(sauvegarde.historiqueResultats)) {
             historiqueResultats = sauvegarde.historiqueResultats;
@@ -1696,4 +1712,71 @@ function afficherMenuEvaluations() {
         .addEventListener("submit", creerEvaluation);
 
     afficherListeEvaluations();
+}
+
+
+let evaluations = [];
+let prochainIdEvaluation = 1;
+
+function creerEvaluation(event) {
+    event.preventDefault();
+
+    const donnees = new FormData(event.currentTarget);
+
+    const titre = String(donnees.get("titre") || "").trim();
+    const classeId = Number(donnees.get("classeId"));
+    const matiere = String(donnees.get("matiere") || "");
+
+    const classe = classes.find(c => c.id === classeId);
+
+    if (!titre || !classe || !matieresDisponibles.includes(matiere)) {
+        document.getElementById("message-evaluation").textContent =
+            "Vérifie le titre, la classe et la matière.";
+        return;
+    }
+
+    evaluations.push({
+        id: prochainIdEvaluation++,
+        titre,
+        classeId,
+        classeNom: classe.nom,
+        matiere,
+        date: new Date().toLocaleDateString("fr-FR"),
+        questions: [],
+        notes: []
+    });
+
+    sauvegarderDonnees();
+
+    document.getElementById("message-evaluation").textContent =
+        `✅ L'évaluation « ${titre} » a été créée pour la classe ${classe.nom}.`;
+
+    event.currentTarget.reset();
+
+    afficherListeEvaluations();
+}
+
+function afficherListeEvaluations() {
+    const liste = document.getElementById("liste-evaluations");
+
+    if (!liste) return;
+
+    if (evaluations.length === 0) {
+        liste.innerHTML = "<p>Aucune évaluation créée pour le moment.</p>";
+        return;
+    }
+
+    liste.innerHTML = `
+        <h3>📋 Évaluations préparées</h3>
+
+        ${evaluations.map(evaluation => `
+            <article class="evaluation-card">
+                <h4>${echapperHTML(evaluation.titre)}</h4>
+                <p>🏫 Classe : ${echapperHTML(evaluation.classeNom)}</p>
+                <p>📚 Matière : ${echapperHTML(evaluation.matiere)}</p>
+                <p>📅 Créée le : ${echapperHTML(evaluation.date)}</p>
+                <p>❓ Questions : ${evaluation.questions.length}</p>
+            </article>
+        `).join("")}
+    `;
 }
