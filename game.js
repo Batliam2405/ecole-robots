@@ -1665,7 +1665,6 @@ window.addEventListener("beforeunload", sauvegarderDonnees);
 function afficherMenuEvaluations() {
 const zone = document.getElementById("section-contenu");
 
-```
 zone.innerHTML = `
     <div class="evaluations">
         <h2>📝 Mes évaluations</h2>
@@ -1713,14 +1712,12 @@ document.getElementById("form-evaluation")
     .addEventListener("submit", creerEvaluation);
 
 afficherListeEvaluations();
-```
 
 }
 
 function creerEvaluation(event) {
 event.preventDefault();
 
-```
 const donnees = new FormData(event.currentTarget);
 
 const titre = String(donnees.get("titre") || "").trim();
@@ -1755,7 +1752,6 @@ document.getElementById("message-evaluation").textContent =
 event.currentTarget.reset();
 
 afficherListeEvaluations();
-```
 
 }
 
