@@ -987,6 +987,9 @@ function afficherFonctionCours(type) {
         "click",
         afficherMenuCours
     );
+
+    // Ajouter automatiquement la première question
+document.getElementById("ajouter-question-exercice").click();
 }
 
 
