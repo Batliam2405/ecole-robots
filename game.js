@@ -890,46 +890,52 @@ function afficherFonctionCours(type) {
     const zoneQuestions = document.getElementById("questions-exercice");
     let nombreQuestions = 0;
 
-    document.getElementById("ajouter-question-exercice")
-        .addEventListener("click", () => {
-            nombreQuestions++;
+    
+document.getElementById("ajouter-question-exercice")
+    .addEventListener("click", function () {
+        nombreQuestions++;
 
-            const bloc = document.createElement("div");
-            bloc.className = "question-exercice";
-            bloc.dataset.numero = nombreQuestions;
+        const bloc = document.createElement("div");
+        bloc.className = "question-exercice";
+        bloc.dataset.numero = nombreQuestions;
 
-            bloc.innerHTML = `
-                <hr>
-                <h3>Question ${nombreQuestions}</h3>
+        bloc.innerHTML = `
+            <hr>
+            <h3>Question ${nombreQuestions}</h3>
 
-                <label>Énoncé :</label>
-                <input
-                    type="text"
-                    class="question-enonce"
-                    placeholder="Écris la question"
-                >
+            <label>Énoncé :</label>
+            <input
+                type="text"
+                class="question-enonce"
+                placeholder="Écris la question"
+            >
 
-                <br><br>
+            <br><br>
 
-                <label>Réponse attendue :</label>
-                <input
-                    type="text"
-                    class="question-reponse"
-                    placeholder="Écris la bonne réponse"
-                >
+            <label>Réponse attendue :</label>
+            <input
+                type="text"
+                class="question-reponse"
+                placeholder="Écris la bonne réponse"
+            >
 
-                <br><br>
+            <br><br>
 
-                <button type="button" class="supprimer-question">
-                    🗑️ Supprimer cette question
-                </button>
-            `;
+            <button type="button" class="supprimer-question">
+                🗑️ Supprimer cette question
+            </button>
+        `;
 
-            bloc.querySelector(".supprimer-question")
-                .addEventListener("click", () => bloc.remove());
+        bloc.querySelector(".supprimer-question").addEventListener(
+            "click",
+            function () {
+                bloc.remove();
+            }
+        );
 
-            zoneQuestions.appendChild(bloc);
-        });
+        zoneQuestions.appendChild(bloc);
+        bloc.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
 
     document.getElementById("enregistrer-exercice")
         .addEventListener("click", () => {
