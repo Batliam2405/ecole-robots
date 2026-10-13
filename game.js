@@ -2798,3 +2798,61 @@ function corrigerCopie(evaluationId, copieId) {
                 `✅ Note enregistrée : ${copie.note}/20`;
         });
 }
+
+
+function afficherListeExercicesADistribuer() {
+    const liste = document.getElementById("liste-exercices-a-distribuer");
+    const choixClasse = document.getElementById("exercice-classe");
+
+    if (!liste || !choixClasse) return;
+
+    const classeId = Number(choixClasse.value);
+    const exercicesClasse = exercices.filter(
+        exercice => Number(exercice.classeId) === classeId
+    );
+
+    if (exercicesClasse.length === 0) {
+        liste.innerHTML = "<p>Aucun exercice enregistré pour cette classe.</p>";
+        return;
+    }
+
+    liste.innerHTML = exercicesClasse.map(exercice => `
+        <div class="carte-exercice" style="
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8fafc;
+        ">
+            <h4>📘 ${exercice.titre}</h4>
+            <p><strong>Matière :</strong> ${exercice.matiere}</p>
+            <p><strong>Questions :</strong> ${exercice.questions.length}</p>
+            <p><strong>État :</strong> ${exercice.statut}</p>
+            ${
+                exercice.statut === "à distribuer"
+                    ? `<button type="button" data-distribuer-exercice="${exercice.id}">
+                        📤 Distribuer aux robots
+                    </button>`
+                    : `<p>✅ Cet exercice a déjà été distribué.</p>`
+            }
+        </div>
+    `).join("");
+
+    liste.querySelectorAll("[data-distribuer-exercice]").forEach(bouton => {
+        bouton.addEventListener("click", () => {
+            const exerciceId = Number(bouton.dataset.distribuerExercice);
+            const exercice = exercices.find(e => e.id === exerciceId);
+
+            if (!exercice) return;
+
+            exercice.statut = "distribué";
+            sauvegarderDonnees();
+
+            afficherListeExercicesADistribuer();
+
+            alert(
+                "Exercice distribué ! La prochaine étape permettra aux robots de faire leurs copies."
+            );
+        });
+    });
+}
