@@ -996,6 +996,8 @@ const nouvelExercice = {
 
 afficherListeExercicesADistribuer();
 
+ajouterQuestionExercice();
+
 document.getElementById("exercice-classe").addEventListener("change", () => {
     afficherListeExercicesADistribuer();
 });
