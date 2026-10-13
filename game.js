@@ -827,6 +827,7 @@ function afficherFonctionCours(type) {
         return;
     }
 
+   
     zone.innerHTML = `
         <h2>✏️ Préparation des exercices</h2>
 
@@ -857,6 +858,7 @@ function afficherFonctionCours(type) {
             type="text"
             id="exercice-titre"
             placeholder="Exemple : Les multiplications"
+            required
         >
 
         <br><br>
@@ -885,8 +887,16 @@ function afficherFonctionCours(type) {
         <button type="button" id="retour-menu-cours">
             ↩️ Retour à l'espace professeur
         </button>
-    `;
 
+        <hr>
+
+        <h3>📤 Exercices à distribuer</h3>
+        <div id="liste-exercices-a-distribuer"></div>
+
+        <button type="button" id="retour-menu-cours-bas">
+            ↩️ Retour à l'espace professeur
+        </button>
+    `;
     const zoneQuestions = document.getElementById("questions-exercice");
     let nombreQuestions = 0;
 
