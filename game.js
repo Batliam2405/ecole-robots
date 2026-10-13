@@ -970,17 +970,27 @@ document.getElementById("ajouter-question-exercice")
 
             const classe = classes.find(c => c.id === classeId);
 
-            exercices.push({
-                id: prochainIdExercice++,
-                titre,
-                consigne,
-                classeId,
-                classeNom: classe ? classe.nom : "Classe inconnue",
-                matiere,
-                questions,
-                reponsesRobots: [],
-                date: new Date().toLocaleDateString("fr-FR")
-            });
+           
+const nouvelExercice = {
+    id: prochainIdExercice++,
+    titre,
+    consigne,
+    classeId,
+    classeNom: classe ? classe.nom : "Classe inconnue",
+    matiere,
+    questions,
+    reponsesRobots: [],
+    statut: "à distribuer",
+    date: new Date().toLocaleDateString("fr-FR")
+};
+
+exercices.push(nouvelExercice);
+
+sauvegarderDonnees();
+
+alert("Exercice enregistré ! Tu peux maintenant le distribuer aux robots.");
+
+afficherFonctionCours("exercices");
 
             sauvegarderDonnees();
 
