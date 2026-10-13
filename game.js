@@ -994,6 +994,14 @@ const nouvelExercice = {
     date: new Date().toLocaleDateString("fr-FR")
 };
 
+afficherListeExercicesADistribuer();
+
+document.getElementById("exercice-classe").addEventListener("change", () => {
+    afficherListeExercicesADistribuer();
+});
+
+document.getElementById("retour-menu-cours-bas").addEventListener("click", afficherMenuCours);
+
 exercices.push(nouvelExercice);
 
 sauvegarderDonnees();
