@@ -917,13 +917,17 @@ const travaux = [...exercicesDistribues, ...devoirsEnregistres];
                     <strong>Matière :</strong>
                     ${echapperHTML(exercice.matiere)}
                 </p>
-                <p>
-                    <strong>Questions :</strong>
-                    ${Array.isArray(exercice.questions)
-                        ? exercice.questions.length
-                        : 0}
-                </p>
-                <p>📌 Statut : ${echapperHTML(exercice.statut)}</p>
+               
+<p>
+    <strong>Type :</strong> ${travail.typeTravail}
+</p>
+${
+    travail.nombreQuestions !== null
+        ? `<p><strong>Questions :</strong> ${travail.nombreQuestions}</p>`
+        : ""
+}
+<p>📌 Statut : ${echapperHTML(travail.statut)}</p>
+
             </article>
         `).join("");
     }
