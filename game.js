@@ -809,6 +809,7 @@ function afficherMenuCours() {
 }
 
 
+
 function afficherFonctionCours(type) {
     const zone = document.getElementById("section-contenu");
 
@@ -821,14 +822,11 @@ function afficherFonctionCours(type) {
             </button>
         `;
 
-        document.getElementById("retour-menu-cours").addEventListener(
-            "click",
-            afficherMenuCours
-        );
+        document.getElementById("retour-menu-cours")
+            .addEventListener("click", afficherMenuCours);
         return;
     }
 
-   
     zone.innerHTML = `
         <h2>✏️ Préparation des exercices</h2>
 
@@ -855,21 +853,14 @@ function afficherFonctionCours(type) {
         <br><br>
 
         <label for="exercice-titre">Titre de l'exercice :</label>
-        <input
-            type="text"
-            id="exercice-titre"
-            placeholder="Exemple : Les multiplications"
-            required
-        >
+        <input type="text" id="exercice-titre"
+            placeholder="Exemple : Les multiplications">
 
         <br><br>
 
         <label for="exercice-consigne">Consigne :</label>
-        <textarea
-            id="exercice-consigne"
-            rows="3"
-            placeholder="Explique ce que les robots doivent faire..."
-        ></textarea>
+        <textarea id="exercice-consigne" rows="3"
+            placeholder="Explique ce que les robots doivent faire..."></textarea>
 
         <br><br>
 
@@ -893,60 +884,18 @@ function afficherFonctionCours(type) {
 
         <h3>📤 Exercices à distribuer</h3>
         <div id="liste-exercices-a-distribuer"></div>
-
-        <button type="button" id="retour-menu-cours-bas">
-            ↩️ Retour à l'espace professeur
-        </button>
     `;
+
     const zoneQuestions = document.getElementById("questions-exercice");
-    let nombreQuestions = 0;
 
-    
-document.getElementById("ajouter-question-exercice")
-    .addEventListener("click", function () {
-        nombreQuestions++;
+    document.getElementById("ajouter-question-exercice")
+        .addEventListener("click", ajouterQuestionExercice);
 
-        const bloc = document.createElement("div");
-        bloc.className = "question-exercice";
-        bloc.dataset.numero = nombreQuestions;
+    document.getElementById("retour-menu-cours")
+        .addEventListener("click", afficherMenuCours);
 
-        bloc.innerHTML = `
-            <hr>
-            <h3>Question ${nombreQuestions}</h3>
-
-            <label>Énoncé :</label>
-            <input
-                type="text"
-                class="question-enonce"
-                placeholder="Écris la question"
-            >
-
-            <br><br>
-
-            <label>Réponse attendue :</label>
-            <input
-                type="text"
-                class="question-reponse"
-                placeholder="Écris la bonne réponse"
-            >
-
-            <br><br>
-
-            <button type="button" class="supprimer-question">
-                🗑️ Supprimer cette question
-            </button>
-        `;
-
-        bloc.querySelector(".supprimer-question").addEventListener(
-            "click",
-            function () {
-                bloc.remove();
-            }
-        );
-
-        zoneQuestions.appendChild(bloc);
-        bloc.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
+    document.getElementById("exercice-classe")
+        .addEventListener("change", afficherListeExercicesADistribuer);
 
     document.getElementById("enregistrer-exercice")
         .addEventListener("click", () => {
@@ -957,7 +906,9 @@ document.getElementById("ajouter-question-exercice")
             const titre = document.getElementById("exercice-titre").value.trim();
             const consigne = document.getElementById("exercice-consigne").value.trim();
 
-            const blocs = [...zoneQuestions.querySelectorAll(".question-exercice")];
+            const blocs = [
+                ...zoneQuestions.querySelectorAll(".question-exercice")
+            ];
 
             const questions = blocs.map(bloc => ({
                 enonce: bloc.querySelector(".question-enonce").value.trim(),
@@ -979,55 +930,37 @@ document.getElementById("ajouter-question-exercice")
                 return;
             }
 
-            const classe = classes.find(c => c.id === classeId);
+            const classe = classes.find(c => Number(c.id) === classeId);
 
-           
-const nouvelExercice = {
-    id: prochainIdExercice++,
-    titre,
-    consigne,
-    classeId,
-    classeNom: classe ? classe.nom : "Classe inconnue",
-    matiere,
-    questions,
-    reponsesRobots: [],
-    statut: "à distribuer",
-    date: new Date().toLocaleDateString("fr-FR")
-};
+            const nouvelExercice = {
+                id: prochainIdExercice++,
+                titre,
+                consigne,
+                classeId,
+                classeNom: classe ? classe.nom : "Classe inconnue",
+                matiere,
+                questions,
+                reponsesRobots: [],
+                statut: "à distribuer",
+                date: new Date().toLocaleDateString("fr-FR")
+            };
 
-afficherListeExercicesADistribuer();
-
-ajouterQuestionExercice();
-
-document.getElementById("exercice-classe").addEventListener("change", () => {
-    afficherListeExercicesADistribuer();
-});
-
-document.getElementById("retour-menu-cours-bas").addEventListener("click", afficherMenuCours);
-
-exercices.push(nouvelExercice);
-
-sauvegarderDonnees();
-
-alert("Exercice enregistré ! Tu peux maintenant le distribuer aux robots.");
-
-afficherFonctionCours("exercices");
-
+            exercices.push(nouvelExercice);
             sauvegarderDonnees();
 
-            alert("Exercice enregistré !");
+            alert("Exercice enregistré ! Tu peux maintenant le distribuer aux robots.");
 
             afficherFonctionCours("exercices");
         });
 
-    document.getElementById("retour-menu-cours").addEventListener(
-        "click",
-        afficherMenuCours
-    );
+    // Ajouter une première question seulement si la liste est vide.
+    if (zoneQuestions.children.length === 0) {
+        ajouterQuestionExercice();
+    }
 
-    // Ajouter automatiquement la première question
-document.getElementById("ajouter-question-exercice").click();
+    afficherListeExercicesADistribuer();
 }
+
 
 
 function afficherPreparationLecon() {
