@@ -3339,13 +3339,43 @@ function afficherNotesBulletin(classeId) {
 }
 
 
-function genererReponseRobot(question, robot, exercice) {
-    const reponseAttendue = question.reponse.trim();
 
-    // Le robot répond correctement pour cette première version.
-    // Nous ajouterons ensuite des niveaux de réussite différents.
-    return reponseAttendue;
+function genererReponseRobot(question, robot, exercice) {
+    const reponseAttendue = String(question.reponse).trim();
+
+    // Chaque robot a 65 % de chances de répondre correctement.
+    const reussite = Math.random() < 0.65;
+
+    if (reussite) {
+        return reponseAttendue;
+    }
+
+    // Si la réponse attendue est un nombre, proposer un nombre erroné.
+    const nombre = Number(reponseAttendue.replace(",", "."));
+
+    if (reponseAttendue !== "" && Number.isFinite(nombre)) {
+        const ecart = Math.floor(Math.random() * 5) + 1;
+        const erreur = Math.random() < 0.5
+            ? nombre + ecart
+            : nombre - ecart;
+
+        return String(erreur).replace(".", ",");
+    }
+
+    // Pour les autres matières, varier les réponses incorrectes.
+    const mauvaisesReponses = [
+        "Je ne sais pas.",
+        "Je pense que c'est une autre réponse.",
+        "Je ne suis pas sûr de ma réponse.",
+        "J'ai essayé, mais je me suis trompé.",
+        "Je dois encore réviser cette leçon."
+    ];
+
+    return mauvaisesReponses[
+        Math.floor(Math.random() * mauvaisesReponses.length)
+    ];
 }
+
 
 function faireTravaillerLesRobots(exerciceId) {
     const exercice = exercices.find(
