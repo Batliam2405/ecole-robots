@@ -2988,6 +2988,118 @@ function ouvrirCopiesRobots(exerciceId) {
 }
 
 
+function faireCopieRobot(exerciceId, robotId) {
+    const exercice = exercices.find(e => Number(e.id) === Number(exerciceId));
+    const robot = robots.find(r => Number(r.id) === Number(robotId));
+
+    if (!exercice || !robot) {
+        alert("Exercice ou robot introuvable.");
+        return;
+    }
+
+    if (!exercice.reponsesRobots) {
+        exercice.reponsesRobots = [];
+    }
+
+    const ancienneCopie = exercice.reponsesRobots.find(
+        copie => Number(copie.robotId) === Number(robotId)
+    );
+
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <h2>📝 Copie de ${robot.nom}</h2>
+        <h3>${exercice.titre}</h3>
+        <p><strong>Matière :</strong> ${exercice.matiere}</p>
+        <p>${exercice.consigne || "Lis chaque question et écris ta réponse."}</p>
+
+        <form id="formulaire-copie-robot">
+            <div id="questions-copie-robot"></div>
+
+            <button type="submit">💾 Rendre la copie</button>
+            <button type="button" id="annuler-copie-robot">
+                ↩️ Retour aux copies
+            </button>
+        </form>
+    `;
+
+    const questionsZone = document.getElementById("questions-copie-robot");
+
+    questionsZone.innerHTML = exercice.questions.map((question, index) => {
+        const reponseExistante = ancienneCopie &&
+            ancienneCopie.reponses &&
+            ancienneCopie.reponses[index] !== undefined
+                ? ancienneCopie.reponses[index]
+                : "";
+
+        return `
+            <div style="
+                padding: 12px;
+                margin: 12px 0;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+            ">
+                <label for="reponse-robot-${index}">
+                    <strong>Question ${index + 1} :</strong>
+                    ${question.enonce}
+                </label>
+                <textarea
+                    id="reponse-robot-${index}"
+                    name="reponse-${index}"
+                    rows="3"
+                    style="display:block;width:100%;margin-top:8px;box-sizing:border-box;"
+                    required
+                >${reponseExistante}</textarea>
+            </div>
+        `;
+    }).join("");
+
+    document.getElementById("formulaire-copie-robot")
+        .addEventListener("submit", event => {
+            event.preventDefault();
+
+            const reponses = exercice.questions.map((question, index) => {
+                return document.getElementById(`reponse-robot-${index}`).value.trim();
+            });
+
+            if (reponses.some(reponse => reponse === "")) {
+                alert("Réponds à toutes les questions avant de rendre la copie.");
+                return;
+            }
+
+            const copie = {
+                robotId: robot.id,
+                robotNom: robot.nom,
+                reponses: reponses,
+                date: new Date().toLocaleString("fr-FR"),
+                statut: "à corriger"
+            };
+
+            const indexCopie = exercice.reponsesRobots.findIndex(
+                r => Number(r.robotId) === Number(robot.id)
+            );
+
+            if (indexCopie >= 0) {
+                exercice.reponsesRobots[indexCopie] = copie;
+            } else {
+                exercice.reponsesRobots.push(copie);
+            }
+
+            sauvegarderDonnees();
+
+            alert("Copie de " + robot.nom + " enregistrée !");
+
+            ouvrirCopiesRobots(exercice.id);
+        });
+
+    document.getElementById("annuler-copie-robot")
+        .addEventListener("click", () => {
+            ouvrirCopiesRobots(exercice.id);
+        });
+}
+
+
+
 function afficherBulletins() {
     const zone = document.getElementById("section-contenu");
 
