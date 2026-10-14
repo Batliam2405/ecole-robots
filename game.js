@@ -832,19 +832,81 @@ document.getElementById("bouton-voir-exercices").addEventListener(
 function afficherFonctionCours(type) {
     const zone = document.getElementById("section-contenu");
 
-    if (type === "corrections") {
-        zone.innerHTML = `
-            <h2>✅ Corrections des travaux</h2>
-            <p>Les réponses des robots seront affichées ici.</p>
-            <button type="button" id="retour-menu-cours">
-                ↩️ Retour à l'espace professeur
-            </button>
-        `;
+    
+if (type === "corrections") {
+    zone.innerHTML = `
+        <h2>✅ Corrections des travaux</h2>
+        <p>Retrouve ici les exercices distribués aux classes.</p>
 
-        document.getElementById("retour-menu-cours")
-            .addEventListener("click", afficherMenuCours);
-        return;
+        <label for="classe-corrections">🏫 Choisir une classe :</label>
+        <select id="classe-corrections">
+            <option value="">Toutes les classes</option>
+            ${classes.map(classe => `
+                <option value="${classe.id}">
+                    ${echapperHTML(classe.nom)}
+                </option>
+            `).join("")}
+        </select>
+
+        <div id="liste-corrections"></div>
+
+        <br>
+
+        <button type="button" id="retour-menu-cours">
+            ↩️ Retour à l'espace professeur
+        </button>
+    `;
+
+    const selectClasse = document.getElementById("classe-corrections");
+    const liste = document.getElementById("liste-corrections");
+
+    function afficherTravauxACorriger() {
+        const classeId = selectClasse.value;
+
+        const travaux = exercices.filter(exercice =>
+            exercice.statut === "distribué" &&
+            (!classeId || Number(exercice.classeId) === Number(classeId))
+        );
+
+        if (travaux.length === 0) {
+            liste.innerHTML = `
+                <p>📭 Aucun exercice distribué pour cette sélection.</p>
+                <p>Distribue d'abord un exercice depuis la préparation des exercices.</p>
+            `;
+            return;
+        }
+
+        liste.innerHTML = travaux.map(exercice => `
+            <article class="evaluation-card">
+                <h3>📝 ${echapperHTML(exercice.titre)}</h3>
+                <p>
+                    <strong>Classe :</strong>
+                    ${echapperHTML(exercice.classeNom)}
+                </p>
+                <p>
+                    <strong>Matière :</strong>
+                    ${echapperHTML(exercice.matiere)}
+                </p>
+                <p>
+                    <strong>Questions :</strong>
+                    ${Array.isArray(exercice.questions)
+                        ? exercice.questions.length
+                        : 0}
+                </p>
+                <p>📌 Statut : ${echapperHTML(exercice.statut)}</p>
+            </article>
+        `).join("");
     }
+
+    selectClasse.addEventListener("change", afficherTravauxACorriger);
+
+    document.getElementById("retour-menu-cours")
+        .addEventListener("click", afficherMenuCours);
+
+    afficherTravauxACorriger();
+    return;
+}
+
 
     zone.innerHTML = `
         <h2>✏️ Préparation des exercices</h2>
