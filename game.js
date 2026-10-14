@@ -75,7 +75,6 @@ let robots = [
 
 let prochainIdRobot = 4;
 let historiqueResultats = [];
-let historiqueLeconsTerminees = [];
 let devoirs = [];
 let exercices = [];
 let prochainIdExercice = 1;
@@ -114,7 +113,7 @@ function ouvrirSection(section) {
     } else if (section === "evaluations") {
         afficherMenuEvaluations();
 
-    
+
     } else if (section === "eleves") {
         afficherEspaceEleves();
 
@@ -770,18 +769,6 @@ function afficherMenuCours() {
                 </div>
             </article>
 
-            
-<article class="robot-card">
-    <div class="robot-info">
-        <h3>👁️ Voir les exercices</h3>
-        <p>Consulte les exercices distribués et les copies de tes élèves.</p>
-        <button type="button" id="bouton-voir-exercices">
-            Voir les exercices
-        </button>
-    </div>
-</article>
-
-
             <article class="robot-card">
                 <div class="robot-info">
                     <h3>✅ Corrections</h3>
@@ -809,13 +796,6 @@ function afficherMenuCours() {
         () => afficherFonctionCours("exercices")
     );
 
-    
-document.getElementById("bouton-voir-exercices").addEventListener(
-    "click",
-    afficherMenuVoirExercices
-);
-
-
     document.getElementById("bouton-corrections").addEventListener(
         "click",
         () => afficherFonctionCours("corrections")
@@ -828,19 +808,31 @@ document.getElementById("bouton-voir-exercices").addEventListener(
 }
 
 
-
 function afficherFonctionCours(type) {
     const zone = document.getElementById("section-contenu");
 
-    
-if (type === "corrections") {
-    zone.innerHTML = `
-        <h2>✅ Corrections des travaux</h2>
-        <p>Retrouve ici les exercices distribués aux classes.</p>
+    if (type === "corrections") {
+        zone.innerHTML = `
+            <h2>✅ Corrections des travaux</h2>
+            <p>Les réponses des robots seront affichées ici.</p>
+            <button type="button" id="retour-menu-cours">
+                ↩️ Retour à l'espace professeur
+            </button>
+        `;
 
-        <label for="classe-corrections">🏫 Choisir une classe :</label>
-        <select id="classe-corrections">
-            <option value="">Toutes les classes</option>
+        document.getElementById("retour-menu-cours").addEventListener(
+            "click",
+            afficherMenuCours
+        );
+        return;
+    }
+
+    
+    zone.innerHTML = `
+        <h2>✏️ Préparation des exercices</h2>
+
+        <label for="exercice-classe">Classe :</label>
+        <select id="exercice-classe">
             ${classes.map(classe => `
                 <option value="${classe.id}">
                     ${echapperHTML(classe.nom)}
@@ -848,85 +840,191 @@ if (type === "corrections") {
             `).join("")}
         </select>
 
-        <div id="liste-corrections"></div>
+        <br><br>
+
+        <label for="exercice-matiere">Matière :</label>
+        <select id="exercice-matiere">
+            ${matieresDisponibles.map(matiere => `
+                <option value="${echapperHTML(matiere)}">
+                    ${echapperHTML(matiere)}
+                </option>
+            `).join("")}
+        </select>
+
+        <br><br>
+
+        <label for="exercice-titre">Titre de l'exercice :</label>
+        <input
+            type="text"
+            id="exercice-titre"
+            placeholder="Exemple : Les multiplications"
+            required
+        >
+
+        <br><br>
+
+        <label for="exercice-consigne">Consigne :</label>
+        <textarea
+            id="exercice-consigne"
+            rows="3"
+            placeholder="Explique ce que les robots doivent faire..."
+        ></textarea>
+
+        <br><br>
+
+        <button type="button" id="ajouter-question-exercice">
+            ➕ Ajouter une question
+        </button>
+
+        <div id="questions-exercice"></div>
 
         <br>
+
+        <button type="button" id="enregistrer-exercice">
+            💾 Enregistrer l'exercice
+        </button>
 
         <button type="button" id="retour-menu-cours">
             ↩️ Retour à l'espace professeur
         </button>
+
+        <hr>
+
+        <h3>📤 Exercices à distribuer</h3>
+        <div id="liste-exercices-a-distribuer"></div>
+
+        <button type="button" id="retour-menu-cours-bas">
+            ↩️ Retour à l'espace professeur
+        </button>
     `;
 
-    const selectClasse = document.getElementById("classe-corrections");
-    const liste = document.getElementById("liste-corrections");
+    const zoneQuestions = document.getElementById("questions-exercice");
+    let nombreQuestions = 0;
 
     
-function afficherTravauxACorriger() {
-    const classeId = selectClasse.value;
+document.getElementById("ajouter-question-exercice")
+    .addEventListener("click", function () {
+        nombreQuestions++;
 
-    const exercicesDistribues = exercices
-        .filter(exercice =>
-            exercice.statut === "distribué" &&
-            (!classeId || Number(exercice.classeId) === Number(classeId))
-        )
-        .map(exercice => ({
-            titre: exercice.titre,
-            classeNom: exercice.classeNom,
-            matiere: exercice.matiere,
-            typeTravail: "Exercice",
-            nombreQuestions: Array.isArray(exercice.questions)
-                ? exercice.questions.length
-                : 0,
-            statut: exercice.statut
-        }));
+        const bloc = document.createElement("div");
+        bloc.className = "question-exercice";
+        bloc.dataset.numero = nombreQuestions;
 
-    const devoirsEnregistres = devoirs
-        .filter(devoir =>
-            !classeId || Number(devoir.classeId) === Number(classeId)
-        )
-        .map(devoir => ({
-            titre: devoir.titre,
-            classeNom: devoir.classeNom,
-            matiere: devoir.matiere,
-            typeTravail: "Devoir",
-            nombreQuestions: null,
-            statut: "Enregistré"
-        }));
+        bloc.innerHTML = `
+            <hr>
+            <h3>Question ${nombreQuestions}</h3>
 
-    const travaux = [...exercicesDistribues, ...devoirsEnregistres];
+            <label>Énoncé :</label>
+            <input
+                type="text"
+                class="question-enonce"
+                placeholder="Écris la question"
+            >
 
-    if (travaux.length === 0) {
-        liste.innerHTML = `
-            <p>📭 Aucun devoir ni exercice pour cette sélection.</p>
+            <br><br>
+
+            <label>Réponse attendue :</label>
+            <input
+                type="text"
+                class="question-reponse"
+                placeholder="Écris la bonne réponse"
+            >
+
+            <br><br>
+
+            <button type="button" class="supprimer-question">
+                🗑️ Supprimer cette question
+            </button>
         `;
-        return;
-    }
 
-    liste.innerHTML = travaux.map(travail => `
-        <article class="evaluation-card">
-            <h3>📝 ${echapperHTML(travail.titre || "Sans titre")}</h3>
+        bloc.querySelector(".supprimer-question").addEventListener(
+            "click",
+            function () {
+                bloc.remove();
+            }
+        );
 
-            <p>
-                <strong>Classe :</strong>
-                ${echapperHTML(travail.classeNom || "Classe inconnue")}
-            </p>
+        zoneQuestions.appendChild(bloc);
+        bloc.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
 
-            <p>
-                <strong>Matière :</strong>
-                ${echapperHTML(travail.matiere || "Non précisée")}
-            </p>
+    document.getElementById("enregistrer-exercice")
+        .addEventListener("click", () => {
+            const classeId = Number(
+                document.getElementById("exercice-classe").value
+            );
+            const matiere = document.getElementById("exercice-matiere").value;
+            const titre = document.getElementById("exercice-titre").value.trim();
+            const consigne = document.getElementById("exercice-consigne").value.trim();
 
-            <p><strong>Type :</strong> ${travail.typeTravail}</p>
+            const blocs = [...zoneQuestions.querySelectorAll(".question-exercice")];
 
-            ${
-                travail.nombreQuestions !== null
-                    ? `<p><strong>Questions :</strong> ${travail.nombreQuestions}</p>`
-                    : ""
+            const questions = blocs.map(bloc => ({
+                enonce: bloc.querySelector(".question-enonce").value.trim(),
+                reponse: bloc.querySelector(".question-reponse").value.trim()
+            }));
+
+            if (!titre) {
+                alert("Écris un titre pour l'exercice.");
+                return;
             }
 
-            <p>📌 Statut : ${echapperHTML(travail.statut)}</p>
-        </article>
-    `).join("");
+            if (questions.length === 0) {
+                alert("Ajoute au moins une question.");
+                return;
+            }
+
+            if (questions.some(q => !q.enonce || !q.reponse)) {
+                alert("Complète toutes les questions et leurs réponses attendues.");
+                return;
+            }
+
+            const classe = classes.find(c => c.id === classeId);
+
+            
+const nouvelExercice = {
+    id: prochainIdExercice++,
+    titre,
+    consigne,
+    classeId,
+    classeNom: classe ? classe.nom : "Classe inconnue",
+    matiere,
+    questions,
+    reponsesRobots: [],
+    statut: "à distribuer",
+    date: new Date().toLocaleDateString("fr-FR")
+};
+
+afficherListeExercicesADistribuer();
+
+document.getElementById("exercice-classe").addEventListener("change", () => {
+    afficherListeExercicesADistribuer();
+});
+
+document.getElementById("retour-menu-cours-bas").addEventListener("click", afficherMenuCours);
+
+exercices.push(nouvelExercice);
+
+sauvegarderDonnees();
+
+alert("Exercice enregistré ! Tu peux maintenant le distribuer aux robots.");
+
+afficherFonctionCours("exercices");
+
+            sauvegarderDonnees();
+
+            alert("Exercice enregistré !");
+
+            afficherFonctionCours("exercices");
+        });
+
+    document.getElementById("retour-menu-cours").addEventListener(
+        "click",
+        afficherMenuCours
+    );
+
+    // Ajouter automatiquement la première question
+document.getElementById("ajouter-question-exercice").click();
 }
 
 
@@ -1302,40 +1400,8 @@ sauvegarderDonnees();
             }
         });
 
-   
-document.getElementById("terminer-lecon")
-    .addEventListener("click", function() {
-
-        // Vérifier que cette leçon n'a pas déjà été enregistrée
-        const dejaEnregistree = historiqueLeconsTerminees.some(
-            element =>
-                element.leconId === lecon.id &&
-                element.classeId === lecon.classeId
-        );
-
-        if (!dejaEnregistree) {
-            historiqueLeconsTerminees.push({
-                id: Date.now(),
-                leconId: lecon.id,
-                titre: lecon.titre,
-                classeId: lecon.classeId,
-                classeNom: lecon.classeNom,
-                matiere: lecon.matiere,
-                contenu: lecon.contenu,
-                date: new Date().toLocaleString("fr-FR"),
-                statut: "Terminée"
-            });
-
-            sauvegarderDonnees();
-        }
-
-        alert("✅ Leçon terminée et enregistrée pour la classe " +
-            lecon.classeNom + " !");
-
-        zoneCoursEnPreparation = null;
-        afficherMenuCours();
-    });
-
+    document.getElementById("terminer-lecon")
+        .addEventListener("click", afficherMenuCours);
 
     document.getElementById("retour-menu-cours")
         .addEventListener("click", afficherMenuCours);
@@ -1712,8 +1778,7 @@ function sauvegarderDonnees() {
     evaluations,
     prochainIdEvaluation,
     historiqueResultats,
-historiqueLeconsTerminees,
-emploisDuTemps,
+    emploisDuTemps,
     historiqueAppels,
     historiqueDevoirs,
     prochainIdRobot,
@@ -1763,19 +1828,16 @@ prochainIdExercice = sauvegarde.prochainIdExercice;
 
 
         if (Array.isArray(sauvegarde.evaluations)) {
-    evaluations = sauvegarde.evaluations;
-}
+         evaluations = sauvegarde.evaluations;
+        }
 
-if (Number.isInteger(sauvegarde.prochainIdEvaluation)) {
-    prochainIdEvaluation = sauvegarde.prochainIdEvaluation;
-}
+        if (Number.isInteger(sauvegarde.prochainIdEvaluation)) {
+         prochainIdEvaluation = sauvegarde.prochainIdEvaluation;
+        }
 
         if (Array.isArray(sauvegarde.historiqueResultats)) {
             historiqueResultats = sauvegarde.historiqueResultats;
         }
-
-        historiqueLeconsTerminees =
-    sauvegarde.historiqueLeconsTerminees || [];
 
         if (
         sauvegarde.emploisDuTemps &&
@@ -1912,7 +1974,6 @@ afficherListeEvaluations();
 
 function afficherListeEvaluations() {
 const liste = document.getElementById("liste-evaluations");
-
 
 if (!liste) return;
 
@@ -2141,10 +2202,12 @@ function retourListeEvaluations() {
 afficherMenuEvaluations();
 }
 
+
 function publierEvaluation(evaluationId) {
 const evaluation = evaluations.find(
 element => element.id === Number(evaluationId)
 );
+
 
 if (!evaluation) {
     alert("Évaluation introuvable.");
@@ -2244,6 +2307,11 @@ function afficherEvaluationsEleve() {
                 <p>🎯 Total : ${evaluation.questions.reduce(
                     (total, question) => total + Number(question.points || 0), 0
                 )} points</p>
+
+<button type="button" class="primary-button"
+    onclick="ouvrirEvaluationClasse(${Number(evaluation.id)})">
+    ✏️ Passer l'évaluation
+</button>
                 <p>📌 Statut : À passer</p>
             </article>
         `).join("")}
@@ -2284,7 +2352,7 @@ function afficherEvaluationsClasse(classeId) {
                     (total, question) => total + Number(question.points || 0), 0
                 )} points</p>
                 <button type="button" class="primary-button"
-    onclick="ouvrirEvaluationClasse(${Number(evaluation.id)})">
+   onclick="ouvrirEvaluationClasse(${Number(evaluation.id)})">
     ✏️ Passer l'évaluation
 </button>
             </article>
@@ -2793,11 +2861,7 @@ function afficherListeExercicesADistribuer() {
 
             if (!exercice) return;
 
-            
             exercice.statut = "distribué";
-
-            ouvrirCopiesRobots(exercice.id);
-
             sauvegarderDonnees();
 
             afficherListeExercicesADistribuer();
@@ -2807,743 +2871,4 @@ function afficherListeExercicesADistribuer() {
             );
         });
     });
-}
-
-
-function ouvrirCopiesRobots(exerciceId) {
-    const exercice = exercices.find(e => e.id === Number(exerciceId));
-
-    if (!exercice) {
-        alert("Exercice introuvable.");
-        return;
-    }
-
-    if (exercice.statut !== "distribué") {
-        alert("Distribue d'abord cet exercice à la classe.");
-        return;
-    }
-
-    const zone = document.getElementById("section-contenu");
-    const eleves = robots.filter(
-        robot => Number(robot.classeId) === Number(exercice.classeId)
-    );
-
-    if (!exercice.reponsesRobots) {
-        exercice.reponsesRobots = [];
-    }
-
-    zone.innerHTML = `
-        <h2>🤖 Copies des robots</h2>
-        <h3>${exercice.titre}</h3>
-        <button type="button" id="faire-travailler-classe">
-    🤖 Faire travailler tous les robots
-</button>
-        <p>Classe : ${exercice.classeNom}</p>
-        <p>Matière : ${exercice.matiere}</p>
-
-        <div id="liste-copies-robots"></div>
-
-        <button type="button" id="retour-copies-exercices">
-            ↩️ Retour aux exercices
-        </button>
-    `;
-
-    const liste = document.getElementById("liste-copies-robots");
-
-    document.getElementById("faire-travailler-classe")
-    .addEventListener("click", () => {
-        faireTravaillerLesRobots(exercice.id);
-    });
-
-    if (eleves.length === 0) {
-        liste.innerHTML = "<p>Aucun robot dans cette classe.</p>";
-    } else {
-        liste.innerHTML = eleves.map(robot => {
-            const copie = exercice.reponsesRobots.find(
-                r => Number(r.robotId) === Number(robot.id)
-            );
-
-            return `
-                <div style="
-                    border: 1px solid #cbd5e1;
-                    border-radius: 10px;
-                    padding: 12px;
-                    margin: 10px 0;
-                ">
-                    <h4>🤖 ${robot.nom}</h4>
-                    <p>
-                        État :
-                        ${copie ? "📝 Copie rendue" : "⏳ À faire"}
-                    </p>
-                    <button
-                        type="button"
-                        data-faire-exercice="${robot.id}">
-                        ${copie ? "Modifier la copie" : "Faire l'exercice"}
-                    </button>
-                </div>
-            `;
-        }).join("");
-    }
-
-    liste.querySelectorAll("[data-faire-exercice]").forEach(bouton => {
-        bouton.addEventListener("click", () => {
-            faireCopieRobot(
-                exercice.id,
-                Number(bouton.dataset.faireExercice)
-            );
-        });
-    });
-
-    document.getElementById("retour-copies-exercices")
-        .addEventListener("click", () => {
-            afficherFonctionCours("exercices");
-        });
-}
-
-
-function faireCopieRobot(exerciceId, robotId) {
-    const exercice = exercices.find(e => Number(e.id) === Number(exerciceId));
-    const robot = robots.find(r => Number(r.id) === Number(robotId));
-
-    if (!exercice || !robot) {
-        alert("Exercice ou robot introuvable.");
-        return;
-    }
-
-    if (!exercice.reponsesRobots) {
-        exercice.reponsesRobots = [];
-    }
-
-    const ancienneCopie = exercice.reponsesRobots.find(
-        copie => Number(copie.robotId) === Number(robotId)
-    );
-
-    const zone = document.getElementById("section-contenu");
-
-    zone.innerHTML = `
-        <h2>📝 Copie de ${robot.nom}</h2>
-        <h3>${exercice.titre}</h3>
-        <p><strong>Matière :</strong> ${exercice.matiere}</p>
-        <p>${exercice.consigne || "Lis chaque question et écris ta réponse."}</p>
-
-        <form id="formulaire-copie-robot">
-            <div id="questions-copie-robot"></div>
-
-            <button type="submit">💾 Rendre la copie</button>
-            <button type="button" id="annuler-copie-robot">
-                ↩️ Retour aux copies
-            </button>
-        </form>
-    `;
-
-    const questionsZone = document.getElementById("questions-copie-robot");
-
-    questionsZone.innerHTML = exercice.questions.map((question, index) => {
-        const reponseExistante = ancienneCopie &&
-            ancienneCopie.reponses &&
-            ancienneCopie.reponses[index] !== undefined
-                ? ancienneCopie.reponses[index]
-                : "";
-
-        return `
-            <div style="
-                padding: 12px;
-                margin: 12px 0;
-                border: 1px solid #cbd5e1;
-                border-radius: 10px;
-            ">
-                <label for="reponse-robot-${index}">
-                    <strong>Question ${index + 1} :</strong>
-                    ${question.enonce}
-                </label>
-                <textarea
-                    id="reponse-robot-${index}"
-                    name="reponse-${index}"
-                    rows="3"
-                    style="display:block;width:100%;margin-top:8px;box-sizing:border-box;"
-                    required
-                >${reponseExistante}</textarea>
-            </div>
-        `;
-    }).join("");
-
-    document.getElementById("formulaire-copie-robot")
-        .addEventListener("submit", event => {
-            event.preventDefault();
-
-            const reponses = exercice.questions.map((question, index) => {
-                return document.getElementById(`reponse-robot-${index}`).value.trim();
-            });
-
-            if (reponses.some(reponse => reponse === "")) {
-                alert("Réponds à toutes les questions avant de rendre la copie.");
-                return;
-            }
-
-            const copie = {
-                robotId: robot.id,
-                robotNom: robot.nom,
-                reponses: reponses,
-                date: new Date().toLocaleString("fr-FR"),
-                statut: "à corriger"
-            };
-
-            const indexCopie = exercice.reponsesRobots.findIndex(
-                r => Number(r.robotId) === Number(robot.id)
-            );
-
-            if (indexCopie >= 0) {
-                exercice.reponsesRobots[indexCopie] = copie;
-            } else {
-                exercice.reponsesRobots.push(copie);
-            }
-
-            sauvegarderDonnees();
-
-            alert("Copie de " + robot.nom + " enregistrée !");
-
-            ouvrirCopiesRobots(exercice.id);
-        });
-
-    document.getElementById("annuler-copie-robot")
-        .addEventListener("click", () => {
-            ouvrirCopiesRobots(exercice.id);
-        });
-}
-
-
-
-function ajouterQuestionExercice() {
-    const zoneQuestions = document.getElementById("questions-exercice");
-
-    if (!zoneQuestions) {
-        console.error("Zone des questions introuvable.");
-        return;
-    }
-
-    const numero = zoneQuestions.querySelectorAll(".question-exercice").length + 1;
-
-    const bloc = document.createElement("div");
-    bloc.className = "question-exercice";
-
-    bloc.innerHTML = `
-        <hr>
-        <h3>Question ${numero}</h3>
-
-        <label>Énoncé :</label>
-        <input
-            type="text"
-            class="question-enonce"
-            placeholder="Écris la question"
-        >
-
-        <br><br>
-
-        <label>Réponse attendue :</label>
-        <input
-            type="text"
-            class="question-reponse"
-            placeholder="Écris la bonne réponse"
-        >
-
-        <br><br>
-
-        <button type="button" class="supprimer-question">
-            🗑️ Supprimer cette question
-        </button>
-    `;
-
-    bloc.querySelector(".supprimer-question").addEventListener("click", () => {
-        bloc.remove();
-
-        zoneQuestions.querySelectorAll(".question-exercice").forEach((question, index) => {
-            question.querySelector("h3").textContent = `Question ${index + 1}`;
-        });
-    });
-
-    zoneQuestions.appendChild(bloc);
-}
-
-
-function afficherBulletins() {
-    const zone = document.getElementById("section-contenu");
-
-    zone.innerHTML = `
-        <div class="evaluations">
-            <h2>📊 Bulletins des élèves robots</h2>
-            <p>Consulte les notes enregistrées par le professeur.</p>
-
-            <label for="classe-bulletin">🏫 Choisir une classe :</label>
-            <select id="classe-bulletin">
-                <option value="">-- Choisir une classe --</option>
-                ${classes.map(classe => `
-                    <option value="${classe.id}">
-                        ${echapperHTML(classe.nom)}
-                    </option>
-                `).join("")}
-            </select>
-
-            <div id="contenu-bulletins">
-                <p>Choisis une classe pour consulter les bulletins.</p>
-            </div>
-
-            <button type="button" class="primary-button"
-                id="retour-bulletins">
-                ↩️ Retour à l'espace professeur
-            </button>
-        </div>
-    `;
-
-    document.getElementById("classe-bulletin").addEventListener(
-        "change",
-        function () {
-            afficherNotesBulletin(Number(this.value));
-        }
-    );
-
-    document.getElementById("retour-bulletins").addEventListener(
-        "click",
-        afficherMenuCours
-    );
-}
-
-
-function afficherNotesBulletin(classeId) {
-    const contenu = document.getElementById("contenu-bulletins");
-    if (!contenu) return;
-
-    if (!classeId) {
-        contenu.innerHTML =
-            "<p>Choisis une classe pour consulter les bulletins.</p>";
-        return;
-    }
-
-    const idClasse = Number(classeId);
-
-    const robotsClasse = robots.filter(
-        robot => Number(robot.classeId) === idClasse
-    );
-
-    const leconsClasse = historiqueLeconsTerminees.filter(
-        lecon => Number(lecon.classeId) === idClasse
-    );
-
-    const exercicesClasse = exercices.filter(
-        exercice => Number(exercice.classeId) === idClasse
-    );
-
-    const evaluationsCorrigees = evaluations.filter(
-        evaluation =>
-            Number(evaluation.classeId) === idClasse &&
-            Array.isArray(evaluation.copies) &&
-            evaluation.copies.some(copie =>
-                copie.statut === "corrigée" &&
-                copie.note !== null &&
-                copie.note !== undefined
-            )
-    );
-
-    if (robotsClasse.length === 0) {
-        contenu.innerHTML = "<p>Aucun élève dans cette classe.</p>";
-        return;
-    }
-
-    contenu.innerHTML = robotsClasse.map(robot => {
-        const notesRobot = [];
-
-        evaluationsCorrigees.forEach(evaluation => {
-            const copie = evaluation.copies.find(
-                element =>
-                    element.robotId === robot.id &&
-                    element.statut === "corrigée" &&
-                    element.note !== null &&
-                    element.note !== undefined
-            );
-
-            if (copie) {
-                notesRobot.push({
-                    titre: evaluation.titre,
-                    matiere: evaluation.matiere,
-                    note: Number(copie.note),
-                    commentaire: copie.commentaire || ""
-                });
-            }
-        });
-
-        return `
-            <article class="evaluation-card">
-                <h3>🤖 ${echapperHTML(robot.nom)}</h3>
-
-                <details>
-                    <summary>
-                        📚 Leçons terminées (${leconsClasse.length})
-                    </summary>
-
-                    ${
-                        leconsClasse.length === 0
-                            ? "<p>Aucune leçon terminée pour cette classe.</p>"
-                            : `
-                                <ul>
-                                    ${leconsClasse.map(lecon => `
-                                        <li>
-                                            <strong>${echapperHTML(lecon.titre || "Leçon sans titre")}</strong>
-                                            — ${echapperHTML(lecon.matiere || "Matière inconnue")}
-                                            <br>
-                                            <small>
-                                                ${echapperHTML(lecon.date || "")}
-                                            </small>
-                                            ${
-                                                lecon.contenu
-                                                    ? `<p>${echapperHTML(lecon.contenu)}</p>`
-                                                    : ""
-                                            }
-                                        </li>
-                                    `).join("")}
-                                </ul>
-                            `
-                    }
-                </details>
-
-                <details>
-                    <summary>
-                        ✏️ Exercices de la classe (${exercicesClasse.length})
-                    </summary>
-
-                    ${
-                        exercicesClasse.length === 0
-                            ? "<p>Aucun exercice enregistré pour cette classe.</p>"
-                            : `
-                                <ul>
-                                    ${exercicesClasse.map(exercice => `
-                                        <li>
-                                            <strong>${echapperHTML(exercice.titre || "Exercice sans titre")}</strong>
-                                            — ${echapperHTML(exercice.matiere || "Matière inconnue")}
-                                            <br>
-                                            <small>
-                                                État : ${echapperHTML(exercice.statut || "inconnu")}
-                                                | Date : ${echapperHTML(exercice.date || "")}
-                                            </small>
-                                            <p>
-                                                ${echapperHTML(exercice.consigne || "")}
-                                            </p>
-                                            <p>
-                                                Nombre de questions :
-                                                ${Array.isArray(exercice.questions) ? exercice.questions.length : 0}
-                                            </p>
-                                        </li>
-                                    `).join("")}
-                                </ul>
-                            `
-                    }
-                </details>
-
-                <details>
-                    <summary>
-                        📝 Notes et évaluations (${notesRobot.length})
-                    </summary>
-
-                    ${
-                        notesRobot.length === 0
-                            ? "<p>Aucune évaluation corrigée pour le moment.</p>"
-                            : `
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Évaluation</th>
-                                            <th>Matière</th>
-                                            <th>Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${notesRobot.map(note => `
-                                            <tr>
-                                                <td>${echapperHTML(note.titre || "")}</td>
-                                                <td>${echapperHTML(note.matiere || "")}</td>
-                                                <td>
-                                                    <strong>
-                                                        ${note.note.toLocaleString("fr-FR")}/20
-                                                    </strong>
-                                                </td>
-                                            </tr>
-                                            ${
-                                                note.commentaire
-                                                    ? `
-                                                        <tr>
-                                                            <td colspan="3">
-                                                                💬 ${echapperHTML(note.commentaire)}
-                                                            </td>
-                                                        </tr>
-                                                    `
-                                                    : ""
-                                            }
-                                        `).join("")}
-                                    </tbody>
-                                </table>
-                            `
-                    }
-                </details>
-            </article>
-        `;
-    }).join("");
-}
-
-
-
-function genererReponseRobot(question, robot, exercice) {
-    const reponseAttendue = String(question.reponse).trim();
-
-    // Chaque robot a 65 % de chances de répondre correctement.
-    const reussite = Math.random() < 0.65;
-
-    if (reussite) {
-        return reponseAttendue;
-    }
-
-    // Si la réponse attendue est un nombre, proposer un nombre erroné.
-    const nombre = Number(reponseAttendue.replace(",", "."));
-
-    if (reponseAttendue !== "" && Number.isFinite(nombre)) {
-        const ecart = Math.floor(Math.random() * 5) + 1;
-        const erreur = Math.random() < 0.5
-            ? nombre + ecart
-            : nombre - ecart;
-
-        return String(erreur).replace(".", ",");
-    }
-
-    // Pour les autres matières, varier les réponses incorrectes.
-    const mauvaisesReponses = [
-        "Je ne sais pas.",
-        "Je pense que c'est une autre réponse.",
-        "Je ne suis pas sûr de ma réponse.",
-        "J'ai essayé, mais je me suis trompé.",
-        "Je dois encore réviser cette leçon."
-    ];
-
-    return mauvaisesReponses[
-        Math.floor(Math.random() * mauvaisesReponses.length)
-    ];
-}
-
-
-function faireTravaillerLesRobots(exerciceId) {
-    const exercice = exercices.find(
-        e => Number(e.id) === Number(exerciceId)
-    );
-
-    if (!exercice) {
-        alert("Exercice introuvable.");
-        return;
-    }
-
-    if (exercice.statut !== "distribué") {
-        alert("Distribue d'abord l'exercice à la classe.");
-        return;
-    }
-
-    const robotsClasse = robots.filter(
-        robot => Number(robot.classeId) === Number(exercice.classeId)
-    );
-
-    if (!exercice.reponsesRobots) {
-        exercice.reponsesRobots = [];
-    }
-
-    robotsClasse.forEach(robot => {
-        const reponses = exercice.questions.map(question =>
-            genererReponseRobot(question, robot, exercice)
-        );
-
-        const copieExistante = exercice.reponsesRobots.findIndex(
-            copie => Number(copie.robotId) === Number(robot.id)
-        );
-
-        const copie = {
-            robotId: robot.id,
-            robotNom: robot.nom,
-            reponses: reponses,
-            date: new Date().toLocaleString("fr-FR"),
-            statut: "à corriger"
-        };
-
-        if (copieExistante >= 0) {
-            exercice.reponsesRobots[copieExistante] = copie;
-        } else {
-            exercice.reponsesRobots.push(copie);
-        }
-    });
-
-    sauvegarderDonnees();
-
-    alert(
-        "Travail terminé ! " +
-        robotsClasse.length +
-        " robots ont rempli leur copie."
-    );
-
-    ouvrirCopiesRobots(exercice.id);
-}
-
-
-function afficherMenuVoirExercices() {
-    const zone = document.getElementById("section-contenu");
-
-    zone.innerHTML = `
-        <h2>👁️ Voir les exercices</h2>
-        <p>Choisis une classe et une matière pour consulter les exercices et les copies.</p>
-
-        <label for="voir-exercices-classe">Classe :</label>
-        <select id="voir-exercices-classe">
-            ${classes.map(classe => `
-                <option value="${classe.id}">
-                    ${echapperHTML(classe.nom)}
-                </option>
-            `).join("")}
-        </select>
-
-        <br><br>
-
-        <label for="voir-exercices-matiere">Matière :</label>
-        <select id="voir-exercices-matiere">
-            ${matieresDisponibles.map(matiere => `
-                <option value="${echapperHTML(matiere)}">
-                    ${echapperHTML(matiere)}
-                </option>
-            `).join("")}
-        </select>
-
-        <br><br>
-
-        <button type="button" id="bouton-rechercher-exercices">
-            🔎 Afficher les exercices
-        </button>
-
-        <div id="resultats-voir-exercices"></div>
-
-        <br>
-
-        <button type="button" id="retour-menu-voir-exercices">
-            ↩️ Retour à l'espace professeur
-        </button>
-    `;
-
-    document.getElementById("bouton-rechercher-exercices")
-        .addEventListener("click", afficherResultatsVoirExercices);
-
-    document.getElementById("retour-menu-voir-exercices")
-        .addEventListener("click", afficherMenuCours);
-}
-
-
-function afficherResultatsVoirExercices() {
-    const classeId = Number(
-        document.getElementById("voir-exercices-classe").value
-    );
-
-    const matiere = document.getElementById("voir-exercices-matiere").value;
-    const resultats = document.getElementById("resultats-voir-exercices");
-
-    const exercicesTrouves = exercices.filter(exercice =>
-        Number(exercice.classeId) === classeId &&
-        exercice.matiere === matiere &&
-        exercice.statut === "distribué"
-    );
-
-    if (exercicesTrouves.length === 0) {
-        resultats.innerHTML = `
-            <p>📭 Aucun exercice distribué dans cette classe pour cette matière.</p>
-        `;
-        return;
-    }
-
-    resultats.innerHTML = exercicesTrouves.map(exercice => `
-        <article class="robot-card" style="margin-top:15px;padding:15px;">
-            <h3>📘 ${echapperHTML(exercice.titre)}</h3>
-            <p><strong>Matière :</strong> ${echapperHTML(exercice.matiere)}</p>
-            <p><strong>Questions :</strong> ${exercice.questions.length}</p>
-            <p><strong>Copies rendues :</strong> ${
-                (exercice.reponsesRobots || []).length
-            }</p>
-
-            <button
-                type="button"
-                data-voir-copies="${exercice.id}">
-                👁️ Consulter les copies
-            </button>
-        </article>
-    `).join("");
-
-    resultats.querySelectorAll("[data-voir-copies]").forEach(bouton => {
-        bouton.addEventListener("click", () => {
-            afficherConsultationCopies(
-                Number(bouton.dataset.voirCopies)
-            );
-        });
-    });
-}
-
-
-function afficherConsultationCopies(exerciceId) {
-    const exercice = exercices.find(
-        e => Number(e.id) === Number(exerciceId)
-    );
-
-    if (!exercice) {
-        alert("Exercice introuvable.");
-        return;
-    }
-
-    const zone = document.getElementById("section-contenu");
-    const copies = exercice.reponsesRobots || [];
-
-    const classe = classes.find(
-        c => Number(c.id) === Number(exercice.classeId)
-    );
-
-    zone.innerHTML = `
-        <h2>📚 Consultation des copies</h2>
-        <h3>${echapperHTML(exercice.titre)}</h3>
-        <p><strong>Classe :</strong> ${echapperHTML(classe ? classe.nom : exercice.classeNom)}</p>
-        <p><strong>Matière :</strong> ${echapperHTML(exercice.matiere)}</p>
-        <p>${echapperHTML(exercice.consigne || "")}</p>
-
-        <h3>📝 Questions et réponses attendues</h3>
-
-        ${exercice.questions.map((question, index) => `
-            <article class="robot-card" style="padding:12px;margin:10px 0;">
-                <p><strong>Question ${index + 1} :</strong> ${echapperHTML(question.enonce)}</p>
-                <p><strong>Réponse attendue :</strong> ${echapperHTML(question.reponse)}</p>
-            </article>
-        `).join("")}
-
-        <h3>🤖 Copies des robots</h3>
-
-        ${copies.length === 0
-            ? "<p>Aucun robot n'a encore rendu sa copie.</p>"
-            : copies.map(copie => `
-                <article class="robot-card" style="padding:12px;margin:10px 0;">
-                    <h4>🤖 ${echapperHTML(copie.robotNom || "Robot")}</h4>
-                    <p><strong>Date :</strong> ${echapperHTML(copie.date || "Non indiquée")}</p>
-
-                    ${exercice.questions.map((question, index) => `
-                        <p><strong>Question ${index + 1} :</strong> ${echapperHTML(question.enonce)}</p>
-                        <p><strong>Réponse du robot :</strong> ${
-                            echapperHTML(
-                                copie.reponses && copie.reponses[index] !== undefined
-                                    ? String(copie.reponses[index])
-                                    : "Pas de réponse"
-                            )
-                        }</p>
-                    `).join("")}
-                </article>
-            `).join("")
-        }
-
-        <button type="button" id="retour-liste-exercices">
-            ↩️ Retour aux exercices
-        </button>
-    `;
-
-    document.getElementById("retour-liste-exercices")
-        .addEventListener("click", afficherMenuVoirExercices);
 }
