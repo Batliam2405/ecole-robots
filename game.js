@@ -2825,7 +2825,11 @@ function afficherListeExercicesADistribuer() {
 
             if (!exercice) return;
 
+            
             exercice.statut = "distribué";
+
+            ouvrirCopiesRobots(exercice.id);
+
             sauvegarderDonnees();
 
             afficherListeExercicesADistribuer();
