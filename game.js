@@ -860,220 +860,73 @@ if (type === "corrections") {
     const selectClasse = document.getElementById("classe-corrections");
     const liste = document.getElementById("liste-corrections");
 
-    function afficherTravauxACorriger() {
-        const classeId = selectClasse.value;
+    
+function afficherTravauxACorriger() {
+    const classeId = selectClasse.value;
 
-        
-const exercicesDistribues = exercices
-    .filter(exercice =>
-        exercice.statut === "distribué" &&
-        (!classeId || Number(exercice.classeId) === Number(classeId))
-    )
-    .map(exercice => ({
-        id: exercice.id,
-        titre: exercice.titre,
-        classeNom: exercice.classeNom,
-        matiere: exercice.matiere,
-        typeTravail: "Exercice",
-        nombreQuestions: Array.isArray(exercice.questions)
-            ? exercice.questions.length
-            : 0,
-        statut: exercice.statut
-    }));
+    const exercicesDistribues = exercices
+        .filter(exercice =>
+            exercice.statut === "distribué" &&
+            (!classeId || Number(exercice.classeId) === Number(classeId))
+        )
+        .map(exercice => ({
+            titre: exercice.titre,
+            classeNom: exercice.classeNom,
+            matiere: exercice.matiere,
+            typeTravail: "Exercice",
+            nombreQuestions: Array.isArray(exercice.questions)
+                ? exercice.questions.length
+                : 0,
+            statut: exercice.statut
+        }));
 
-const devoirsEnregistres = devoirs
-    .filter(devoir =>
-        !classeId || Number(devoir.classeId) === Number(classeId)
-    )
-    .map(devoir => ({
-        id: devoir.id,
-        titre: devoir.titre,
-        classeNom: devoir.classeNom,
-        matiere: devoir.matiere,
-        typeTravail: "Devoir",
-        nombreQuestions: null,
-        statut: "Enregistré"
-    }));
+    const devoirsEnregistres = devoirs
+        .filter(devoir =>
+            !classeId || Number(devoir.classeId) === Number(classeId)
+        )
+        .map(devoir => ({
+            titre: devoir.titre,
+            classeNom: devoir.classeNom,
+            matiere: devoir.matiere,
+            typeTravail: "Devoir",
+            nombreQuestions: null,
+            statut: "Enregistré"
+        }));
 
-const travaux = [...exercicesDistribues, ...devoirsEnregistres];
+    const travaux = [...exercicesDistribues, ...devoirsEnregistres];
 
-
-        if (travaux.length === 0) {
-            liste.innerHTML = `
-                <p>📭 Aucun exercice distribué pour cette sélection.</p>
-                <p>Distribue d'abord un exercice depuis la préparation des exercices.</p>
-            `;
-            return;
-        }
-
-        liste.innerHTML = travaux.map(exercice => `
-            <article class="evaluation-card">
-                <h3>📝 ${echapperHTML(exercice.titre)}</h3>
-                <p>
-                    <strong>Classe :</strong>
-                    ${echapperHTML(exercice.classeNom)}
-                </p>
-                <p>
-                    <strong>Matière :</strong>
-                    ${echapperHTML(exercice.matiere)}
-                </p>
-               
-<p>
-    <strong>Type :</strong> ${travail.typeTravail}
-</p>
-${
-    travail.nombreQuestions !== null
-        ? `<p><strong>Questions :</strong> ${travail.nombreQuestions}</p>`
-        : ""
-}
-<p>📌 Statut : ${echapperHTML(travail.statut)}</p>
-
-            </article>
-        `).join("");
+    if (travaux.length === 0) {
+        liste.innerHTML = `
+            <p>📭 Aucun devoir ni exercice pour cette sélection.</p>
+        `;
+        return;
     }
 
-    selectClasse.addEventListener("change", afficherTravauxACorriger);
+    liste.innerHTML = travaux.map(travail => `
+        <article class="evaluation-card">
+            <h3>📝 ${echapperHTML(travail.titre || "Sans titre")}</h3>
 
-    document.getElementById("retour-menu-cours")
-        .addEventListener("click", afficherMenuCours);
+            <p>
+                <strong>Classe :</strong>
+                ${echapperHTML(travail.classeNom || "Classe inconnue")}
+            </p>
 
-    afficherTravauxACorriger();
-    return;
-}
+            <p>
+                <strong>Matière :</strong>
+                ${echapperHTML(travail.matiere || "Non précisée")}
+            </p>
 
+            <p><strong>Type :</strong> ${travail.typeTravail}</p>
 
-    zone.innerHTML = `
-        <h2>✏️ Préparation des exercices</h2>
-
-        <label for="exercice-classe">Classe :</label>
-        <select id="exercice-classe">
-            ${classes.map(classe => `
-                <option value="${classe.id}">
-                    ${echapperHTML(classe.nom)}
-                </option>
-            `).join("")}
-        </select>
-
-        <br><br>
-
-        <label for="exercice-matiere">Matière :</label>
-        <select id="exercice-matiere">
-            ${matieresDisponibles.map(matiere => `
-                <option value="${echapperHTML(matiere)}">
-                    ${echapperHTML(matiere)}
-                </option>
-            `).join("")}
-        </select>
-
-        <br><br>
-
-        <label for="exercice-titre">Titre de l'exercice :</label>
-        <input type="text" id="exercice-titre"
-            placeholder="Exemple : Les multiplications">
-
-        <br><br>
-
-        <label for="exercice-consigne">Consigne :</label>
-        <textarea id="exercice-consigne" rows="3"
-            placeholder="Explique ce que les robots doivent faire..."></textarea>
-
-        <br><br>
-
-        <button type="button" id="ajouter-question-exercice">
-            ➕ Ajouter une question
-        </button>
-
-        <div id="questions-exercice"></div>
-
-        <br>
-
-        <button type="button" id="enregistrer-exercice">
-            💾 Enregistrer l'exercice
-        </button>
-
-        <button type="button" id="retour-menu-cours">
-            ↩️ Retour à l'espace professeur
-        </button>
-
-        <hr>
-
-        <h3>📤 Exercices à distribuer</h3>
-        <div id="liste-exercices-a-distribuer"></div>
-    `;
-
-    const zoneQuestions = document.getElementById("questions-exercice");
-
-    document.getElementById("ajouter-question-exercice")
-        .addEventListener("click", ajouterQuestionExercice);
-
-    document.getElementById("retour-menu-cours")
-        .addEventListener("click", afficherMenuCours);
-
-    document.getElementById("exercice-classe")
-        .addEventListener("change", afficherListeExercicesADistribuer);
-
-    document.getElementById("enregistrer-exercice")
-        .addEventListener("click", () => {
-            const classeId = Number(
-                document.getElementById("exercice-classe").value
-            );
-            const matiere = document.getElementById("exercice-matiere").value;
-            const titre = document.getElementById("exercice-titre").value.trim();
-            const consigne = document.getElementById("exercice-consigne").value.trim();
-
-            const blocs = [
-                ...zoneQuestions.querySelectorAll(".question-exercice")
-            ];
-
-            const questions = blocs.map(bloc => ({
-                enonce: bloc.querySelector(".question-enonce").value.trim(),
-                reponse: bloc.querySelector(".question-reponse").value.trim()
-            }));
-
-            if (!titre) {
-                alert("Écris un titre pour l'exercice.");
-                return;
+            ${
+                travail.nombreQuestions !== null
+                    ? `<p><strong>Questions :</strong> ${travail.nombreQuestions}</p>`
+                    : ""
             }
 
-            if (questions.length === 0) {
-                alert("Ajoute au moins une question.");
-                return;
-            }
-
-            if (questions.some(q => !q.enonce || !q.reponse)) {
-                alert("Complète toutes les questions et leurs réponses attendues.");
-                return;
-            }
-
-            const classe = classes.find(c => Number(c.id) === classeId);
-
-            const nouvelExercice = {
-                id: prochainIdExercice++,
-                titre,
-                consigne,
-                classeId,
-                classeNom: classe ? classe.nom : "Classe inconnue",
-                matiere,
-                questions,
-                reponsesRobots: [],
-                statut: "à distribuer",
-                date: new Date().toLocaleDateString("fr-FR")
-            };
-
-            exercices.push(nouvelExercice);
-            sauvegarderDonnees();
-
-            alert("Exercice enregistré ! Tu peux maintenant le distribuer aux robots.");
-
-            afficherFonctionCours("exercices");
-        });
-
-    // Ajouter une première question seulement si la liste est vide.
-    if (zoneQuestions.children.length === 0) {
-        ajouterQuestionExercice();
-    }
-
-    afficherListeExercicesADistribuer();
+            <p>📌 Statut : ${echapperHTML(travail.statut)}</p>
+        </article>
+    `).join("");
 }
 
 
