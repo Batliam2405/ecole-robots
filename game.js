@@ -770,6 +770,18 @@ function afficherMenuCours() {
                 </div>
             </article>
 
+            
+<article class="robot-card">
+    <div class="robot-info">
+        <h3>👁️ Voir les exercices</h3>
+        <p>Consulte les exercices distribués et les copies de tes élèves.</p>
+        <button type="button" id="bouton-voir-exercices">
+            Voir les exercices
+        </button>
+    </div>
+</article>
+
+
             <article class="robot-card">
                 <div class="robot-info">
                     <h3>✅ Corrections</h3>
@@ -796,6 +808,13 @@ function afficherMenuCours() {
         "click",
         () => afficherFonctionCours("exercices")
     );
+
+    
+document.getElementById("bouton-voir-exercices").addEventListener(
+    "click",
+    afficherMenuVoirExercices
+);
+
 
     document.getElementById("bouton-corrections").addEventListener(
         "click",
@@ -3384,4 +3403,168 @@ function faireTravaillerLesRobots(exerciceId) {
     );
 
     ouvrirCopiesRobots(exercice.id);
+}
+
+
+function afficherMenuVoirExercices() {
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <h2>👁️ Voir les exercices</h2>
+        <p>Choisis une classe et une matière pour consulter les exercices et les copies.</p>
+
+        <label for="voir-exercices-classe">Classe :</label>
+        <select id="voir-exercices-classe">
+            ${classes.map(classe => `
+                <option value="${classe.id}">
+                    ${echapperHTML(classe.nom)}
+                </option>
+            `).join("")}
+        </select>
+
+        <br><br>
+
+        <label for="voir-exercices-matiere">Matière :</label>
+        <select id="voir-exercices-matiere">
+            ${matieresDisponibles.map(matiere => `
+                <option value="${echapperHTML(matiere)}">
+                    ${echapperHTML(matiere)}
+                </option>
+            `).join("")}
+        </select>
+
+        <br><br>
+
+        <button type="button" id="bouton-rechercher-exercices">
+            🔎 Afficher les exercices
+        </button>
+
+        <div id="resultats-voir-exercices"></div>
+
+        <br>
+
+        <button type="button" id="retour-menu-voir-exercices">
+            ↩️ Retour à l'espace professeur
+        </button>
+    `;
+
+    document.getElementById("bouton-rechercher-exercices")
+        .addEventListener("click", afficherResultatsVoirExercices);
+
+    document.getElementById("retour-menu-voir-exercices")
+        .addEventListener("click", afficherMenuCours);
+}
+
+
+function afficherResultatsVoirExercices() {
+    const classeId = Number(
+        document.getElementById("voir-exercices-classe").value
+    );
+
+    const matiere = document.getElementById("voir-exercices-matiere").value;
+    const resultats = document.getElementById("resultats-voir-exercices");
+
+    const exercicesTrouves = exercices.filter(exercice =>
+        Number(exercice.classeId) === classeId &&
+        exercice.matiere === matiere &&
+        exercice.statut === "distribué"
+    );
+
+    if (exercicesTrouves.length === 0) {
+        resultats.innerHTML = `
+            <p>📭 Aucun exercice distribué dans cette classe pour cette matière.</p>
+        `;
+        return;
+    }
+
+    resultats.innerHTML = exercicesTrouves.map(exercice => `
+        <article class="robot-card" style="margin-top:15px;padding:15px;">
+            <h3>📘 ${echapperHTML(exercice.titre)}</h3>
+            <p><strong>Matière :</strong> ${echapperHTML(exercice.matiere)}</p>
+            <p><strong>Questions :</strong> ${exercice.questions.length}</p>
+            <p><strong>Copies rendues :</strong> ${
+                (exercice.reponsesRobots || []).length
+            }</p>
+
+            <button
+                type="button"
+                data-voir-copies="${exercice.id}">
+                👁️ Consulter les copies
+            </button>
+        </article>
+    `).join("");
+
+    resultats.querySelectorAll("[data-voir-copies]").forEach(bouton => {
+        bouton.addEventListener("click", () => {
+            afficherConsultationCopies(
+                Number(bouton.dataset.voirCopies)
+            );
+        });
+    });
+}
+
+
+function afficherConsultationCopies(exerciceId) {
+    const exercice = exercices.find(
+        e => Number(e.id) === Number(exerciceId)
+    );
+
+    if (!exercice) {
+        alert("Exercice introuvable.");
+        return;
+    }
+
+    const zone = document.getElementById("section-contenu");
+    const copies = exercice.reponsesRobots || [];
+
+    const classe = classes.find(
+        c => Number(c.id) === Number(exercice.classeId)
+    );
+
+    zone.innerHTML = `
+        <h2>📚 Consultation des copies</h2>
+        <h3>${echapperHTML(exercice.titre)}</h3>
+        <p><strong>Classe :</strong> ${echapperHTML(classe ? classe.nom : exercice.classeNom)}</p>
+        <p><strong>Matière :</strong> ${echapperHTML(exercice.matiere)}</p>
+        <p>${echapperHTML(exercice.consigne || "")}</p>
+
+        <h3>📝 Questions et réponses attendues</h3>
+
+        ${exercice.questions.map((question, index) => `
+            <article class="robot-card" style="padding:12px;margin:10px 0;">
+                <p><strong>Question ${index + 1} :</strong> ${echapperHTML(question.enonce)}</p>
+                <p><strong>Réponse attendue :</strong> ${echapperHTML(question.reponse)}</p>
+            </article>
+        `).join("")}
+
+        <h3>🤖 Copies des robots</h3>
+
+        ${copies.length === 0
+            ? "<p>Aucun robot n'a encore rendu sa copie.</p>"
+            : copies.map(copie => `
+                <article class="robot-card" style="padding:12px;margin:10px 0;">
+                    <h4>🤖 ${echapperHTML(copie.robotNom || "Robot")}</h4>
+                    <p><strong>Date :</strong> ${echapperHTML(copie.date || "Non indiquée")}</p>
+
+                    ${exercice.questions.map((question, index) => `
+                        <p><strong>Question ${index + 1} :</strong> ${echapperHTML(question.enonce)}</p>
+                        <p><strong>Réponse du robot :</strong> ${
+                            echapperHTML(
+                                copie.reponses && copie.reponses[index] !== undefined
+                                    ? String(copie.reponses[index])
+                                    : "Pas de réponse"
+                            )
+                        }</p>
+                    `).join("")}
+                </article>
+            `).join("")
+        }
+
+        <button type="button" id="retour-liste-exercices">
+            ↩️ Retour aux exercices
+        </button>
+    `;
+
+    document.getElementById("retour-liste-exercices")
+        .addEventListener("click", afficherMenuVoirExercices);
 }
