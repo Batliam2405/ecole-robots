@@ -2867,6 +2867,9 @@ function ouvrirCopiesRobots(exerciceId) {
     zone.innerHTML = `
         <h2>🤖 Copies des robots</h2>
         <h3>${exercice.titre}</h3>
+        <button type="button" id="faire-travailler-classe">
+    🤖 Faire travailler tous les robots
+</button>
         <p>Classe : ${exercice.classeNom}</p>
         <p>Matière : ${exercice.matiere}</p>
 
@@ -2878,6 +2881,11 @@ function ouvrirCopiesRobots(exerciceId) {
     `;
 
     const liste = document.getElementById("liste-copies-robots");
+
+    document.getElementById("faire-travailler-classe")
+    .addEventListener("click", () => {
+        faireTravaillerLesRobots(exercice.id);
+    });
 
     if (eleves.length === 0) {
         liste.innerHTML = "<p>Aucun robot dans cette classe.</p>";
@@ -3311,3 +3319,69 @@ function afficherNotesBulletin(classeId) {
     }).join("");
 }
 
+
+function genererReponseRobot(question, robot, exercice) {
+    const reponseAttendue = question.reponse.trim();
+
+    // Le robot répond correctement pour cette première version.
+    // Nous ajouterons ensuite des niveaux de réussite différents.
+    return reponseAttendue;
+}
+
+function faireTravaillerLesRobots(exerciceId) {
+    const exercice = exercices.find(
+        e => Number(e.id) === Number(exerciceId)
+    );
+
+    if (!exercice) {
+        alert("Exercice introuvable.");
+        return;
+    }
+
+    if (exercice.statut !== "distribué") {
+        alert("Distribue d'abord l'exercice à la classe.");
+        return;
+    }
+
+    const robotsClasse = robots.filter(
+        robot => Number(robot.classeId) === Number(exercice.classeId)
+    );
+
+    if (!exercice.reponsesRobots) {
+        exercice.reponsesRobots = [];
+    }
+
+    robotsClasse.forEach(robot => {
+        const reponses = exercice.questions.map(question =>
+            genererReponseRobot(question, robot, exercice)
+        );
+
+        const copieExistante = exercice.reponsesRobots.findIndex(
+            copie => Number(copie.robotId) === Number(robot.id)
+        );
+
+        const copie = {
+            robotId: robot.id,
+            robotNom: robot.nom,
+            reponses: reponses,
+            date: new Date().toLocaleString("fr-FR"),
+            statut: "à corriger"
+        };
+
+        if (copieExistante >= 0) {
+            exercice.reponsesRobots[copieExistante] = copie;
+        } else {
+            exercice.reponsesRobots.push(copie);
+        }
+    });
+
+    sauvegarderDonnees();
+
+    alert(
+        "Travail terminé ! " +
+        robotsClasse.length +
+        " robots ont rempli leur copie."
+    );
+
+    ouvrirCopiesRobots(exercice.id);
+}
