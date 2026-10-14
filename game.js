@@ -3099,6 +3099,60 @@ function faireCopieRobot(exerciceId, robotId) {
 }
 
 
+function ajouterQuestionExercice() {
+    const zoneQuestions = document.getElementById("questions-exercice");
+
+    if (!zoneQuestions) {
+        console.error("La zone questions-exercice est introuvable.");
+        return;
+    }
+
+    const numero = zoneQuestions.querySelectorAll(".bloc-question-exercice").length + 1;
+
+    const bloc = document.createElement("div");
+    bloc.className = "bloc-question-exercice";
+    bloc.style.cssText = `
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 12px;
+        margin: 12px 0;
+        background: #f8fafc;
+    `;
+
+    bloc.innerHTML = `
+        <h4>Question ${numero}</h4>
+
+        <label>Énoncé de la question :</label>
+        <textarea class="question-enonce"
+            rows="2"
+            placeholder="Écris la question ici..."
+            required
+            style="display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;"></textarea>
+
+        <label>Réponse attendue :</label>
+        <textarea class="question-reponse"
+            rows="2"
+            placeholder="Écris la bonne réponse ici..."
+            required
+            style="display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;"></textarea>
+
+        <button type="button" class="supprimer-question-exercice">
+            🗑️ Supprimer cette question
+        </button>
+    `;
+
+    bloc.querySelector(".supprimer-question-exercice").addEventListener("click", () => {
+        bloc.remove();
+
+        zoneQuestions.querySelectorAll(".bloc-question-exercice").forEach((question, index) => {
+            const titre = question.querySelector("h4");
+            if (titre) titre.textContent = `Question ${index + 1}`;
+        });
+    });
+
+    zoneQuestions.appendChild(bloc);
+}
+
 
 function afficherBulletins() {
     const zone = document.getElementById("section-contenu");
