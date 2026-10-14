@@ -2905,6 +2905,89 @@ function afficherListeExercicesADistribuer() {
 }
 
 
+function ouvrirCopiesRobots(exerciceId) {
+    const exercice = exercices.find(e => e.id === Number(exerciceId));
+
+    if (!exercice) {
+        alert("Exercice introuvable.");
+        return;
+    }
+
+    if (exercice.statut !== "distribué") {
+        alert("Distribue d'abord cet exercice à la classe.");
+        return;
+    }
+
+    const zone = document.getElementById("section-contenu");
+    const eleves = robots.filter(
+        robot => Number(robot.classeId) === Number(exercice.classeId)
+    );
+
+    if (!exercice.reponsesRobots) {
+        exercice.reponsesRobots = [];
+    }
+
+    zone.innerHTML = `
+        <h2>🤖 Copies des robots</h2>
+        <h3>${exercice.titre}</h3>
+        <p>Classe : ${exercice.classeNom}</p>
+        <p>Matière : ${exercice.matiere}</p>
+
+        <div id="liste-copies-robots"></div>
+
+        <button type="button" id="retour-copies-exercices">
+            ↩️ Retour aux exercices
+        </button>
+    `;
+
+    const liste = document.getElementById("liste-copies-robots");
+
+    if (eleves.length === 0) {
+        liste.innerHTML = "<p>Aucun robot dans cette classe.</p>";
+    } else {
+        liste.innerHTML = eleves.map(robot => {
+            const copie = exercice.reponsesRobots.find(
+                r => Number(r.robotId) === Number(robot.id)
+            );
+
+            return `
+                <div style="
+                    border: 1px solid #cbd5e1;
+                    border-radius: 10px;
+                    padding: 12px;
+                    margin: 10px 0;
+                ">
+                    <h4>🤖 ${robot.nom}</h4>
+                    <p>
+                        État :
+                        ${copie ? "📝 Copie rendue" : "⏳ À faire"}
+                    </p>
+                    <button
+                        type="button"
+                        data-faire-exercice="${robot.id}">
+                        ${copie ? "Modifier la copie" : "Faire l'exercice"}
+                    </button>
+                </div>
+            `;
+        }).join("");
+    }
+
+    liste.querySelectorAll("[data-faire-exercice]").forEach(bouton => {
+        bouton.addEventListener("click", () => {
+            faireCopieRobot(
+                exercice.id,
+                Number(bouton.dataset.faireExercice)
+            );
+        });
+    });
+
+    document.getElementById("retour-copies-exercices")
+        .addEventListener("click", () => {
+            afficherFonctionCours("exercices");
+        });
+}
+
+
 function afficherBulletins() {
     const zone = document.getElementById("section-contenu");
 
