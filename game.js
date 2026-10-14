@@ -2947,22 +2947,34 @@ function afficherBulletins() {
     );
 }
 
+
 function afficherNotesBulletin(classeId) {
     const contenu = document.getElementById("contenu-bulletins");
     if (!contenu) return;
 
     if (!classeId) {
-        contenu.innerHTML = "<p>Choisis une classe pour consulter les bulletins.</p>";
+        contenu.innerHTML =
+            "<p>Choisis une classe pour consulter les bulletins.</p>";
         return;
     }
 
+    const idClasse = Number(classeId);
+
     const robotsClasse = robots.filter(
-        robot => robot.classeId === Number(classeId)
+        robot => Number(robot.classeId) === idClasse
+    );
+
+    const leconsClasse = historiqueLeconsTerminees.filter(
+        lecon => Number(lecon.classeId) === idClasse
+    );
+
+    const exercicesClasse = exercices.filter(
+        exercice => Number(exercice.classeId) === idClasse
     );
 
     const evaluationsCorrigees = evaluations.filter(
         evaluation =>
-            evaluation.classeId === Number(classeId) &&
+            Number(evaluation.classeId) === idClasse &&
             Array.isArray(evaluation.copies) &&
             evaluation.copies.some(copie =>
                 copie.statut === "corrigée" &&
@@ -3002,38 +3014,116 @@ function afficherNotesBulletin(classeId) {
             <article class="evaluation-card">
                 <h3>🤖 ${echapperHTML(robot.nom)}</h3>
 
-                ${
-                    notesRobot.length === 0
-                    ? "<p>📚 Aucune évaluation corrigée pour le moment.</p>"
-                    : `
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Évaluation</th>
-                                    <th>Matière</th>
-                                    <th>Note</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${notesRobot.map(note => `
-                                    <tr>
-                                        <td>${echapperHTML(note.titre)}</td>
-                                        <td>${echapperHTML(note.matiere)}</td>
-                                        <td><strong>${note.note.toLocaleString("fr-FR")}/20</strong></td>
-                                    </tr>
-                                    ${note.commentaire ? `
+                <details>
+                    <summary>
+                        📚 Leçons terminées (${leconsClasse.length})
+                    </summary>
+
+                    ${
+                        leconsClasse.length === 0
+                            ? "<p>Aucune leçon terminée pour cette classe.</p>"
+                            : `
+                                <ul>
+                                    ${leconsClasse.map(lecon => `
+                                        <li>
+                                            <strong>${echapperHTML(lecon.titre || "Leçon sans titre")}</strong>
+                                            — ${echapperHTML(lecon.matiere || "Matière inconnue")}
+                                            <br>
+                                            <small>
+                                                ${echapperHTML(lecon.date || "")}
+                                            </small>
+                                            ${
+                                                lecon.contenu
+                                                    ? `<p>${echapperHTML(lecon.contenu)}</p>`
+                                                    : ""
+                                            }
+                                        </li>
+                                    `).join("")}
+                                </ul>
+                            `
+                    }
+                </details>
+
+                <details>
+                    <summary>
+                        ✏️ Exercices de la classe (${exercicesClasse.length})
+                    </summary>
+
+                    ${
+                        exercicesClasse.length === 0
+                            ? "<p>Aucun exercice enregistré pour cette classe.</p>"
+                            : `
+                                <ul>
+                                    ${exercicesClasse.map(exercice => `
+                                        <li>
+                                            <strong>${echapperHTML(exercice.titre || "Exercice sans titre")}</strong>
+                                            — ${echapperHTML(exercice.matiere || "Matière inconnue")}
+                                            <br>
+                                            <small>
+                                                État : ${echapperHTML(exercice.statut || "inconnu")}
+                                                | Date : ${echapperHTML(exercice.date || "")}
+                                            </small>
+                                            <p>
+                                                ${echapperHTML(exercice.consigne || "")}
+                                            </p>
+                                            <p>
+                                                Nombre de questions :
+                                                ${Array.isArray(exercice.questions) ? exercice.questions.length : 0}
+                                            </p>
+                                        </li>
+                                    `).join("")}
+                                </ul>
+                            `
+                    }
+                </details>
+
+                <details>
+                    <summary>
+                        📝 Notes et évaluations (${notesRobot.length})
+                    </summary>
+
+                    ${
+                        notesRobot.length === 0
+                            ? "<p>Aucune évaluation corrigée pour le moment.</p>"
+                            : `
+                                <table>
+                                    <thead>
                                         <tr>
-                                            <td colspan="3">
-                                                💬 ${echapperHTML(note.commentaire)}
-                                            </td>
+                                            <th>Évaluation</th>
+                                            <th>Matière</th>
+                                            <th>Note</th>
                                         </tr>
-                                    ` : ""}
-                                `).join("")}
-                            </tbody>
-                        </table>
-                    `
-                }
+                                    </thead>
+                                    <tbody>
+                                        ${notesRobot.map(note => `
+                                            <tr>
+                                                <td>${echapperHTML(note.titre || "")}</td>
+                                                <td>${echapperHTML(note.matiere || "")}</td>
+                                                <td>
+                                                    <strong>
+                                                        ${note.note.toLocaleString("fr-FR")}/20
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                            ${
+                                                note.commentaire
+                                                    ? `
+                                                        <tr>
+                                                            <td colspan="3">
+                                                                💬 ${echapperHTML(note.commentaire)}
+                                                            </td>
+                                                        </tr>
+                                                    `
+                                                    : ""
+                                            }
+                                        `).join("")}
+                                    </tbody>
+                                </table>
+                            `
+                    }
+                </details>
             </article>
         `;
     }).join("");
 }
+
