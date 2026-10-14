@@ -863,10 +863,40 @@ if (type === "corrections") {
     function afficherTravauxACorriger() {
         const classeId = selectClasse.value;
 
-        const travaux = exercices.filter(exercice =>
-            exercice.statut === "distribué" &&
-            (!classeId || Number(exercice.classeId) === Number(classeId))
-        );
+        
+const exercicesDistribues = exercices
+    .filter(exercice =>
+        exercice.statut === "distribué" &&
+        (!classeId || Number(exercice.classeId) === Number(classeId))
+    )
+    .map(exercice => ({
+        id: exercice.id,
+        titre: exercice.titre,
+        classeNom: exercice.classeNom,
+        matiere: exercice.matiere,
+        typeTravail: "Exercice",
+        nombreQuestions: Array.isArray(exercice.questions)
+            ? exercice.questions.length
+            : 0,
+        statut: exercice.statut
+    }));
+
+const devoirsEnregistres = devoirs
+    .filter(devoir =>
+        !classeId || Number(devoir.classeId) === Number(classeId)
+    )
+    .map(devoir => ({
+        id: devoir.id,
+        titre: devoir.titre,
+        classeNom: devoir.classeNom,
+        matiere: devoir.matiere,
+        typeTravail: "Devoir",
+        nombreQuestions: null,
+        statut: "Enregistré"
+    }));
+
+const travaux = [...exercicesDistribues, ...devoirsEnregistres];
+
 
         if (travaux.length === 0) {
             liste.innerHTML = `
