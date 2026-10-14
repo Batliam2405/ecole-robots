@@ -75,6 +75,7 @@ let robots = [
 
 let prochainIdRobot = 4;
 let historiqueResultats = [];
+let historiqueLeconsTerminees = [];
 let devoirs = [];
 let exercices = [];
 let prochainIdExercice = 1;
@@ -1400,8 +1401,40 @@ sauvegarderDonnees();
             }
         });
 
-    document.getElementById("terminer-lecon")
-        .addEventListener("click", afficherMenuCours);
+   
+document.getElementById("terminer-lecon")
+    .addEventListener("click", function() {
+
+        // Vérifier que cette leçon n'a pas déjà été enregistrée
+        const dejaEnregistree = historiqueLeconsTerminees.some(
+            element =>
+                element.leconId === lecon.id &&
+                element.classeId === lecon.classeId
+        );
+
+        if (!dejaEnregistree) {
+            historiqueLeconsTerminees.push({
+                id: Date.now(),
+                leconId: lecon.id,
+                titre: lecon.titre,
+                classeId: lecon.classeId,
+                classeNom: lecon.classeNom,
+                matiere: lecon.matiere,
+                contenu: lecon.contenu,
+                date: new Date().toLocaleString("fr-FR"),
+                statut: "Terminée"
+            });
+
+            sauvegarderDonnees();
+        }
+
+        alert("✅ Leçon terminée et enregistrée pour la classe " +
+            lecon.classeNom + " !");
+
+        zoneCoursEnPreparation = null;
+        afficherMenuCours();
+    });
+
 
     document.getElementById("retour-menu-cours")
         .addEventListener("click", afficherMenuCours);
@@ -1778,7 +1811,8 @@ function sauvegarderDonnees() {
     evaluations,
     prochainIdEvaluation,
     historiqueResultats,
-    emploisDuTemps,
+historiqueLeconsTerminees,
+emploisDuTemps,
     historiqueAppels,
     historiqueDevoirs,
     prochainIdRobot,
@@ -1838,6 +1872,9 @@ if (Number.isInteger(sauvegarde.prochainIdEvaluation)) {
         if (Array.isArray(sauvegarde.historiqueResultats)) {
             historiqueResultats = sauvegarde.historiqueResultats;
         }
+
+        historiqueLeconsTerminees =
+    sauvegarde.historiqueLeconsTerminees || [];
 
         if (
         sauvegarde.emploisDuTemps &&
