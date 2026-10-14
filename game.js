@@ -2866,3 +2866,137 @@ function afficherListeExercicesADistribuer() {
         });
     });
 }
+
+
+function afficherBulletins() {
+    const zone = document.getElementById("section-contenu");
+
+    zone.innerHTML = `
+        <div class="evaluations">
+            <h2>📊 Bulletins des élèves robots</h2>
+            <p>Consulte les notes enregistrées par le professeur.</p>
+
+            <label for="classe-bulletin">🏫 Choisir une classe :</label>
+            <select id="classe-bulletin">
+                <option value="">-- Choisir une classe --</option>
+                ${classes.map(classe => `
+                    <option value="${classe.id}">
+                        ${echapperHTML(classe.nom)}
+                    </option>
+                `).join("")}
+            </select>
+
+            <div id="contenu-bulletins">
+                <p>Choisis une classe pour consulter les bulletins.</p>
+            </div>
+
+            <button type="button" class="primary-button"
+                id="retour-bulletins">
+                ↩️ Retour à l'espace professeur
+            </button>
+        </div>
+    `;
+
+    document.getElementById("classe-bulletin").addEventListener(
+        "change",
+        function () {
+            afficherNotesBulletin(Number(this.value));
+        }
+    );
+
+    document.getElementById("retour-bulletins").addEventListener(
+        "click",
+        afficherMenuCours
+    );
+}
+
+function afficherNotesBulletin(classeId) {
+    const contenu = document.getElementById("contenu-bulletins");
+    if (!contenu) return;
+
+    if (!classeId) {
+        contenu.innerHTML = "<p>Choisis une classe pour consulter les bulletins.</p>";
+        return;
+    }
+
+    const robotsClasse = robots.filter(
+        robot => robot.classeId === Number(classeId)
+    );
+
+    const evaluationsCorrigees = evaluations.filter(
+        evaluation =>
+            evaluation.classeId === Number(classeId) &&
+            Array.isArray(evaluation.copies) &&
+            evaluation.copies.some(copie =>
+                copie.statut === "corrigée" &&
+                copie.note !== null &&
+                copie.note !== undefined
+            )
+    );
+
+    if (robotsClasse.length === 0) {
+        contenu.innerHTML = "<p>Aucun élève dans cette classe.</p>";
+        return;
+    }
+
+    contenu.innerHTML = robotsClasse.map(robot => {
+        const notesRobot = [];
+
+        evaluationsCorrigees.forEach(evaluation => {
+            const copie = evaluation.copies.find(
+                element =>
+                    element.robotId === robot.id &&
+                    element.statut === "corrigée" &&
+                    element.note !== null &&
+                    element.note !== undefined
+            );
+
+            if (copie) {
+                notesRobot.push({
+                    titre: evaluation.titre,
+                    matiere: evaluation.matiere,
+                    note: Number(copie.note),
+                    commentaire: copie.commentaire || ""
+                });
+            }
+        });
+
+        return `
+            <article class="evaluation-card">
+                <h3>🤖 ${echapperHTML(robot.nom)}</h3>
+
+                ${
+                    notesRobot.length === 0
+                    ? "<p>📚 Aucune évaluation corrigée pour le moment.</p>"
+                    : `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Évaluation</th>
+                                    <th>Matière</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${notesRobot.map(note => `
+                                    <tr>
+                                        <td>${echapperHTML(note.titre)}</td>
+                                        <td>${echapperHTML(note.matiere)}</td>
+                                        <td><strong>${note.note.toLocaleString("fr-FR")}/20</strong></td>
+                                    </tr>
+                                    ${note.commentaire ? `
+                                        <tr>
+                                            <td colspan="3">
+                                                💬 ${echapperHTML(note.commentaire)}
+                                            </td>
+                                        </tr>
+                                    ` : ""}
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    `
+                }
+            </article>
+        `;
+    }).join("");
+}
