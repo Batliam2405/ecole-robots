@@ -75,6 +75,7 @@ let robots = [
 
 let prochainIdRobot = 4;
 let historiqueResultats = [];
+let historiqueLeconsTerminees = [];
 let devoirs = [];
 let exercices = [];
 let prochainIdExercice = 1;
@@ -1400,8 +1401,37 @@ sauvegarderDonnees();
             }
         });
 
-    document.getElementById("terminer-lecon")
-        .addEventListener("click", afficherMenuCours);
+        document.getElementById("terminer-lecon")
+        .addEventListener("click", function() {
+            const leconDejaEnregistree = historiqueLeconsTerminees.some(
+                ancienneLecon =>
+                    ancienneLecon.classeId === lecon.classeId &&
+                    ancienneLecon.leconId === lecon.id &&
+                    ancienneLecon.date === new Date().toLocaleDateString("fr-FR")
+            );
+
+            if (!leconDejaEnregistree) {
+                historiqueLeconsTerminees.push({
+                    id: Date.now(),
+                    leconId: lecon.id,
+                    titre: lecon.titre,
+                    classeId: lecon.classeId,
+                    classeNom: lecon.classeNom,
+                    matiere: lecon.matiere,
+                    contenu: lecon.contenu,
+                    question: lecon.question,
+                    reponses: [...lecon.reponses],
+                    bonneReponse: lecon.bonneReponse,
+                    date: new Date().toLocaleDateString("fr-FR"),
+                    statut: "Terminée"
+                });
+
+                sauvegarderDonnees();
+            }
+
+            zoneCoursEnPreparation = null;
+            afficherMenuCours();
+        });
 
     document.getElementById("retour-menu-cours")
         .addEventListener("click", afficherMenuCours);
@@ -1509,6 +1539,7 @@ function afficherBulletins() {
 }
 
 
+
 function afficherResultatsBulletins() {
     const select = document.getElementById("classe-bulletins");
     const zone = document.getElementById("contenu-bulletins");
@@ -1534,7 +1565,7 @@ function afficherResultatsBulletins() {
         ${eleves.map(eleve => {
             const resultats = historiqueResultats.flatMap(historique =>
                 historique.classe === classe.nom
-                    ? historique.eleves
+                    ? (historique.eleves || [])
                         .filter(resultat => resultat.nom === eleve.nom)
                         .map(resultat => ({
                             ...resultat,
@@ -1549,34 +1580,98 @@ function afficherResultatsBulletins() {
                 resultat => resultat.correct
             ).length;
 
+            const evaluationsEleve = evaluations.flatMap(evaluation => {
+                if (Number(evaluation.classeId) !== Number(classeId)) {
+                    return [];
+                }
+
+                return (evaluation.copies || [])
+                    .filter(copie =>
+                        Number(copie.robotId) === Number(eleve.id) &&
+                        copie.statut === "corrigée"
+                    )
+                    .map(copie => ({
+                        titre: evaluation.titre,
+                        matiere: evaluation.matiere,
+                        date: copie.date,
+                        note: copie.note,
+                        commentaire: copie.commentaire || ""
+                    }));
+            });
+
             return `
                 <article class="robot-card">
                     <div class="robot-info">
                         <h4>🤖 ${echapperHTML(eleve.nom)}</h4>
+
+                        <h5>📚 Résultats des leçons</h5>
                         <p>Leçons enregistrées : ${resultats.length}</p>
                         <p>Bonnes réponses : ${bonnesReponses}</p>
 
                         ${resultats.length
                             ? `
                                 <details>
-                                    <summary>Voir les résultats</summary>
+                                    <summary>Voir les résultats des leçons</summary>
                                     <ul>
                                         ${resultats.map(resultat => `
                                             <li>
-                                                ${echapperHTML(resultat.lecon)}
-                                                (${echapperHTML(resultat.matiere)})
+                                                <strong>
+                                                    ${echapperHTML(resultat.lecon || "Leçon")}
+                                                </strong>
+                                                (${echapperHTML(resultat.matiere || "")})
                                                 — ${resultat.correct ? "✅ Réussi" : "❌ À revoir"}
                                                 <br>
                                                 Réponse :
-                                                ${echapperHTML(resultat.reponse)}
+                                                ${echapperHTML(resultat.reponse || "")}
                                                 <br>
-                                                <small>${echapperHTML(resultat.date)}</small>
+                                                <small>
+                                                    ${echapperHTML(resultat.date || "")}
+                                                </small>
                                             </li>
                                         `).join("")}
                                     </ul>
                                 </details>
                             `
-                            : "<p>Aucun résultat enregistré pour le moment.</p>"
+                            : "<p>Aucun résultat de leçon enregistré.</p>"
+                        }
+
+                        <h5>📝 Évaluations corrigées</h5>
+
+                        ${evaluationsEleve.length
+                            ? `
+                                <ul>
+                                    ${evaluationsEleve.map(evaluation => `
+                                        <li>
+                                            <strong>
+                                                ${echapperHTML(evaluation.titre)}
+                                            </strong>
+                                            — ${echapperHTML(evaluation.matiere)}
+                                            <br>
+                                            <strong>
+                                                Note :
+                                                ${Number.isFinite(Number(evaluation.note))
+                                                    ? echapperHTML(String(evaluation.note)) + "/20"
+                                                    : "Non disponible"}
+                                            </strong>
+                                            <br>
+                                            <small>
+                                                Rendue le :
+                                                ${echapperHTML(evaluation.date || "")}
+                                            </small>
+                                            ${evaluation.commentaire
+                                                ? `
+                                                    <p>
+                                                        💬 Commentaire du professeur :
+                                                        ${echapperHTML(evaluation.commentaire)}
+                                                    </p>
+                                                `
+                                                : ""
+                                            }
+                                        </li>
+                                    `).join("")}
+                                </ul>
+                            `
+                            : "<p>Aucune évaluation corrigée pour le moment.</p>"
                         }
                     </div>
                 </article>
@@ -1584,6 +1679,7 @@ function afficherResultatsBulletins() {
         }).join("")}
     `;
 }
+
 
 
 function afficherCahierDevoirs() {
@@ -1778,6 +1874,7 @@ function sauvegarderDonnees() {
     evaluations,
     prochainIdEvaluation,
     historiqueResultats,
+    historiqueLeconsTerminees,
     emploisDuTemps,
     historiqueAppels,
     historiqueDevoirs,
@@ -1837,6 +1934,10 @@ prochainIdExercice = sauvegarde.prochainIdExercice;
 
         if (Array.isArray(sauvegarde.historiqueResultats)) {
             historiqueResultats = sauvegarde.historiqueResultats;
+        }
+
+                if (Array.isArray(sauvegarde.historiqueLeconsTerminees)) {
+            historiqueLeconsTerminees = sauvegarde.historiqueLeconsTerminees;
         }
 
         if (
